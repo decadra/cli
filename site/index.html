@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Decadra</title>
+<meta name="description" content="Decadra checks whether the plan you pay for fits the usage you put through it. It reads the session logs Claude Code and Codex already write to your machine, prices that usage under every plan those vendors sell, and reports each provider on its own.">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://decadra.dev/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Decadra">
+<meta property="og:title" content="Decadra">
+<meta property="og:description" content="Decadra checks whether the plan you pay for fits the usage you put through it. It reads the session logs Claude Code and Codex already write to your machine, prices that usage under every plan those vendors sell, and reports each provider on its own.">
+<meta property="og:url" content="https://decadra.dev/">
+<meta property="og:image" content="https://decadra.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Decadra">
+<meta name="twitter:description" content="Decadra checks whether the plan you pay for fits the usage you put through it. It reads the session logs Claude Code and Codex already write to your machine, prices that usage under every plan those vendors sell, and reports each provider on its own.">
+<meta name="twitter:image" content="https://decadra.dev/og.png">
+</head>
+<body>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+  :root{
+    --ink:#0a0a0a;
+    --line:#2c2c2c;
+    --paper:#f1f1ef;
+    --muted:#8d8d8a;
+    --muted-2:#5c5c59;
+    --font-display:'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    --font-body:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    --measure:66ch;
+    --container:1040px;
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--font-body);
+    font-size:15px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:var(--paper); text-decoration:underline; text-decoration-color:var(--muted-2); text-underline-offset:3px;}
+  a:focus-visible, button:focus-visible, summary:focus-visible{
+    outline:2px solid var(--paper);
+    outline-offset:2px;
+  }
+
+  h1,h2,h3{
+    font-family:var(--font-display);
+    color:var(--paper);
+    margin:0;
+    text-wrap:balance;
+  }
+
+  p{margin:0;}
+
+  code{
+    font-family:var(--font-body);
+    background:var(--line);
+    color:var(--paper);
+    padding:1px 6px;
+    font-size:0.9em;
+  }
+
+  .wrap{
+    max-width:var(--container);
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- mark ---------- */
+  .mark{ color:currentColor; display:block; }
+  .footer-mark{ width:22px; height:22px; color:var(--muted-2); display:block; margin:36px auto 16px; }
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+
+  /* ---------- titlebar ---------- */
+  .titlebar{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:rgba(12,13,10,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .titlebar .wrap{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    height:52px;
+  }
+  .title-mark{height:26px; width:auto; color:var(--paper); flex:0 0 auto; display:block;}
+  .dots{display:flex; gap:6px; flex:0 0 auto;}
+  .dots span{
+    width:8px; height:8px; border-radius:50%;
+    background:transparent; border:1px solid var(--muted-2);
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+  .titlenav{
+    margin-left:auto;
+    display:flex;
+    gap:22px;
+    font-size:13px;
+  }
+  .titlenav a{
+    color:var(--muted);
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .titlenav a:hover{color:var(--paper);}
+  .titlenav svg{width:14px; height:14px;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding-top:48px;
+    padding-bottom:44px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr 1fr;
+    gap:56px;
+    align-items:start;
+  }
+  .hero h1{
+    font-size:clamp(34px, 5.8vw, 58px);
+    font-weight:800;
+    line-height:1.08;
+    margin-bottom:22px;
+  }
+  .hero .lede{
+    max-width:52ch;
+    color:var(--muted);
+    font-size:15.5px;
+    margin-bottom:34px;
+  }
+  .hero .lede strong{color:var(--paper); font-weight:500;}
+
+  .cta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-bottom:36px;
+  }
+
+  .feature-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px 26px;
+    margin-bottom:44px;
+    font-size:13px;
+    color:var(--muted);
+    padding-top:22px;
+    border-top:1px solid var(--line);
+  }
+  .feature-row span{display:inline-flex; align-items:center; gap:7px;}
+  .feature-row .chk{font-size:13px; color:var(--paper);}
+
+  .tool-strip{
+    margin-top:52px;
+    padding-top:34px;
+    border-top:1px solid var(--line);
+  }
+  .tool-strip .label{
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--muted-2);
+    margin-bottom:14px;
+    display:block;
+  }
+  .tool-badges{display:flex; flex-wrap:wrap; align-items:center; gap:20px 34px;}
+  .tool-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:34px;
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.02em;
+    color:var(--paper);
+  }
+  .tool-badge.dim{color:var(--muted-2);}
+  .tool-sep{width:1px; height:20px; background:var(--line); flex:0 0 auto; margin:0 4px;}
+  .tool-badge svg{height:30px; width:auto; fill:currentColor; display:block;}
+  .tool-badge.dim svg{height:23px;}
+
+  @media (max-width:640px){
+    .hero-grid{grid-template-columns:1fr;}
+  }
+  .btn{
+    font-family:var(--font-body);
+    font-size:13.5px;
+    text-decoration:none;
+    padding:11px 18px;
+    border:1px solid var(--paper);
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    transition:background .15s ease;
+  }
+  .btn svg{width:15px; height:15px;}
+  .btn-primary{
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .btn-primary:hover{background:rgba(241,241,239,0.85);}
+  .btn-ghost{background:transparent; color:var(--paper);}
+  .btn-ghost:hover{background:var(--line);}
+
+  /* ---------- sections ---------- */
+  section{padding:52px 0; border-bottom:1px solid var(--line);}
+  .section-head{margin-bottom:48px; max-width:var(--measure);}
+  .section-head h2{font-size:22px;}
+  .section-head p{color:var(--muted); margin-top:12px; font-size:14.5px;}
+
+  /* value grid */
+  .value-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border-top:1px solid var(--line);
+    border-left:1px solid var(--line);
+  }
+  .value-cell{
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:28px 30px;
+    position:relative;
+  }
+  .value-cell h3{
+    font-size:16.5px;
+    margin:0 0 10px;
+    font-weight:600;
+  }
+  .value-cell p{color:var(--muted); font-size:14px; line-height:1.65;}
+  .value-cell code{font-size:13px;}
+
+  /* terminal component */
+  .term{
+    background:var(--ink);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .term-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 14px;
+    border-bottom:1px solid var(--line);
+    background:var(--ink);
+  }
+  .term-head .label{
+    color:var(--muted-2);
+    font-size:12px;
+    margin-left:4px;
+  }
+  .term-body{
+    padding:20px 22px;
+    font-size:13.5px;
+    overflow-x:auto;
+  }
+  .term-line{
+    display:flex;
+    gap:10px;
+    white-space:pre;
+    padding:3px 0;
+  }
+  .term-line .prompt{color:var(--muted); flex:0 0 auto;}
+  .term-line .cmd{color:var(--paper);}
+  .term-row{
+    display:flex;
+    justify-content:space-between;
+    gap:24px;
+    padding:4px 0;
+    font-variant-numeric:tabular-nums;
+  }
+  .term-row .k{color:var(--muted); flex:0 0 auto; padding-right:14px;}
+  .term-row .v{color:var(--paper); text-align:right;}
+  .term-row .v .dim{color:var(--muted); margin-left:8px;}
+  .term-note{color:var(--muted-2); font-size:12px; margin-top:14px;}
+  .rule-thin{border-top:1px dashed var(--line); margin:10px 0;}
+
+  /* hero terminal: typed command, then output prints line by line */
+  .hero .term-line .cmd{
+    display:inline-block;
+    overflow:hidden;
+    white-space:nowrap;
+    vertical-align:top;
+    width:0;
+    /* the flex row would stretch this to the 1.7 line box and the caret with it */
+    align-self:center;
+    line-height:1.25;
+    border-right:2px solid var(--paper);
+    animation:type-cmd 1s steps(11,end) 0.3s forwards, blink-caret 0.8s step-end infinite;
+  }
+  @keyframes type-cmd{ from{width:0;} to{width:11ch;} }
+  @keyframes blink-caret{ 50%{border-color:transparent;} }
+  .hero .term-body > *{opacity:0; animation:print-line 0.35s ease forwards;}
+  .hero .term-body > .term-line{opacity:1; animation:none;}
+  .hero .term-body > *:nth-child(2){animation-delay:1.4s;}
+  .hero .term-body > *:nth-child(3){animation-delay:1.6s;}
+  .hero .term-body > *:nth-child(4){animation-delay:1.8s;}
+  .hero .term-body > *:nth-child(5){animation-delay:2s;}
+  .hero .term-body > *:nth-child(6){animation-delay:2.2s;}
+  .hero .term-body > *:nth-child(7){animation-delay:2.4s;}
+  .hero .term-body > *:nth-child(8){animation-delay:2.6s;}
+  .hero .term-body > *:nth-child(9){animation-delay:2.8s;}
+  .hero .term-body > *:nth-child(10){animation-delay:3s;}
+  @keyframes print-line{ from{opacity:0; transform:translateY(-2px);} to{opacity:1; transform:translateY(0);} }
+
+  .copy-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    padding:5px 0;
+  }
+  .copy-row .cmd-text{color:var(--paper); min-width:0; overflow-wrap:anywhere;}
+  .copy-btn{
+    appearance:none;
+    border-radius:0;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    font-family:var(--font-body);
+    font-size:11.5px;
+    padding:4px 9px;
+    cursor:pointer;
+    flex:0 0 auto;
+  }
+  .copy-btn:hover{border-color:var(--muted-2); color:var(--paper);}
+  .copy-btn[data-copied="true"]{color:var(--paper); border-color:var(--paper);}
+
+  .install-grid{
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:40px;
+    align-items:start;
+  }
+  .req-list{list-style:none; margin:18px 0 0; padding:0; font-size:13.5px; color:var(--muted); line-height:1.7;}
+  .req-list li{padding:10px 0; border-top:1px dashed var(--line);}
+  .req-list li:first-child{border-top:none;}
+  .req-list b{color:var(--paper); font-weight:500;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+  }
+  table caption{
+    text-align:left;
+    color:var(--paper);
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:13px;
+    margin-bottom:14px;
+  }
+  table caption.caption-note{
+    color:var(--paper);
+    font-family:var(--font-body);
+    font-weight:400;
+    font-size:12.5px;
+  }
+  th{
+    text-align:left;
+    color:var(--muted-2);
+    font-weight:500;
+    font-size:11.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:0 0 10px;
+    border-bottom:1px solid var(--line);
+  }
+  td{
+    padding:11px 0;
+    border-bottom:1px solid var(--line);
+    color:var(--muted);
+    vertical-align:top;
+  }
+  td:first-child{color:var(--paper); white-space:nowrap; padding-right:18px;}
+  /* the five column table had no gap between columns 2 to 5 at all */
+  .matrix th, .matrix td{padding-right:26px;}
+  .matrix th:last-child, .matrix td:last-child{padding-right:0;}
+  tbody tr{transition:background .12s ease;}
+  tbody tr:hover{background:rgba(44,44,44,0.3);}
+  .tr-highlight td{border-top:1px solid var(--paper); font-weight:600; background:rgba(241,241,239,0.07);}
+  .chk{color:#8fd694; font-weight:700; font-size:14px;}
+  .chk-no{color:#d98a8a; font-weight:400;}
+  .chk-unknown{color:var(--muted-2); font-weight:400;}
+  .table-wrap{overflow-x:auto;}
+  .prov{display:flex; align-items:center; gap:10px; white-space:nowrap;}
+  .prov svg{height:15px; width:auto; fill:currentColor; display:block; flex:0 0 auto; opacity:0.92;}
+  .feat{display:flex; flex-wrap:wrap; gap:6px; align-items:center;}
+  .feat span{font-size:11px; padding:2px 7px; border:1px solid var(--line); color:var(--muted-2); white-space:nowrap;}
+  .feat .yes{color:#8fd694; border-color:rgba(143,214,148,0.34); background:rgba(143,214,148,0.12);}
+  .feat .plan{color:#e3bd6b; border-color:rgba(227,189,107,0.32); background:rgba(227,189,107,0.10);}
+
+  /* faq */
+  .faq-list{border-top:1px solid var(--line);}
+  details{border-bottom:1px solid var(--line);}
+  summary{
+    list-style:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:20px 2px;
+    font-family:var(--font-display);
+    font-size:14.5px;
+    color:var(--paper);
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary .q-prompt{color:var(--paper); font-weight:700;}
+  summary .plus{
+    margin-left:auto;
+    color:var(--muted-2);
+    font-size:16px;
+    width:1em;
+    text-align:center;
+  }
+  summary .plus::before{content:"+";}
+  details[open] summary .plus::before{content:"\2212";}
+  .faq-a{
+    padding:0 2px 22px 30px;
+    color:var(--muted);
+    font-size:14px;
+    max-width:var(--measure);
+  }
+
+  /* footer / status bar */
+  footer{padding:0;}
+  .statusbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+    padding:18px 0 34px;
+  }
+  .statusbar .quote{color:var(--muted); font-size:13px;}
+  .statusbar .links{
+    display:flex;
+    gap:18px;
+    align-items:center;
+    font-size:12.5px;
+    color:var(--muted-2);
+  }
+  .statusbar .links a{color:var(--muted); text-decoration:none;}
+  .statusbar .links a:hover{color:var(--paper);}
+  .statusbar .clock{
+    font-variant-numeric:tabular-nums;
+    color:var(--muted-2);
+  }
+
+  #faq{padding-top:64px;}
+  #faq .section-head{margin-bottom:20px;}
+
+  @media (max-width:720px){
+    .value-grid{grid-template-columns:1fr;}
+    .install-grid{grid-template-columns:1fr;}
+    .titlenav{gap:14px;}
+    .titlenav span.label-text{display:none;}
+  }
+
+  @media (max-width:480px){
+    .wrap{padding:0 16px;}
+    .titlenav{gap:12px; font-size:12px;}
+  }
+</style>
+
+<div class="titlebar">
+  <div class="wrap">
+    <svg class="title-mark" viewBox="0 0 696 170" role="img" aria-label="Decadra" xmlns="http://www.w3.org/2000/svg">
+      <path d="M150.636 50.9933C152.325 50.8542 153.3 50.9543 153.826 52.8112C154.273 54.3911 154.435 55.8893 154.627 57.5095C155.701 66.5963 153.19 75.6072 153.809 84.6723C154.11 89.0705 154.455 93.3981 154.491 97.8139C154.57 107.069 152.933 116.298 153.487 125.542C153.579 127.07 153.689 128.602 153.702 130.133C153.672 132.71 153.31 135.248 153.143 137.822C152.874 141.979 153.452 146.029 152.498 150.13C151.79 153.171 149.396 155.673 146.084 155.503C145.24 155.46 144.795 155.014 144.165 154.515C142.923 153.348 141.723 151.977 140.571 150.72C138.262 148.199 135.973 145.66 133.703 143.105C126.248 134.737 118.885 126.287 111.616 117.757C107.07 112.593 102.57 107.237 98.0554 102.029C90.9596 93.8838 83.7971 85.7979 76.5678 77.7708L71.5607 72.2715C70.5725 71.2011 69.5618 70.1277 68.6398 69.0516C67.7813 68.0497 68.1079 66.4104 69.3517 66.0823C70.9231 65.6678 72.7508 65.3433 74.3422 65.0167L84.1739 62.9307C94.0694 60.7783 104.01 58.8387 113.99 57.1136C117.911 56.4376 121.882 55.8963 125.813 55.2358C134.109 53.8414 142.285 52.0419 150.636 50.9933Z" fill="currentColor"></path>
+      <path d="M57.3498 76.0909C58.4672 76.0338 58.7396 76.2885 59.4852 77.0679C60.6327 78.2675 61.7293 79.5285 62.8337 80.7678L69.9731 88.8724L91.5062 113.324L113.23 138.499L122.564 149.097C123.538 150.213 124.564 151.297 125.517 152.422C125.92 152.935 126.221 153.224 126.243 153.893C126.281 155.025 125.314 155.448 124.239 155.522C122.391 155.647 120.407 155.494 118.525 155.396L112.056 155.105C108.355 154.997 104.814 154.904 101.109 155.104C92.8016 155.55 84.5184 156.658 76.1881 156.513C74.9595 156.492 73.7302 156.425 72.502 156.396L60.0328 156.089C57.2958 156.041 54.5594 155.969 51.8237 155.874C50.0891 155.818 48.371 155.818 46.6743 155.515C44.2996 155.09 44.116 153.341 44.4258 151.303C45.3826 145.01 46.4758 138.714 47.5766 132.448C49.0501 124.139 50.4364 115.815 51.7354 107.477L54.8078 86.7989L55.6316 81.1908C55.8138 79.9416 55.9714 78.6276 56.2876 77.4092C56.4651 76.725 56.7494 76.4225 57.3498 76.0909Z" fill="currentColor"></path>
+      <path d="M75.7916 3.68191C78.34 3.51842 81.5165 3.67278 84.0571 3.94441C102.739 5.94244 121.429 8.89949 140.272 8.65191C144.047 8.57606 147.676 8.49235 150.367 11.6067C153.588 15.336 152.37 20.6767 152.732 25.2614C152.874 26.9781 153.083 28.6888 153.359 30.3892C153.557 31.6671 153.811 32.9314 153.874 34.2271C153.967 35.8156 153.488 36.7199 151.914 37.1829C145.151 39.1726 138.111 40.4131 131.2 41.6879C116.391 44.5428 101.566 47.3091 86.7243 49.9868C82.2201 50.7633 77.7081 51.4953 73.1901 52.1828C71.0936 52.4945 68.9854 52.8348 66.8717 53.0434C65.8776 53.1415 64.4293 53.1614 64.2426 51.856C64.1367 51.1157 64.3181 49.867 64.4538 49.1289C64.9541 46.4082 65.5087 43.694 66.0434 40.9791C66.902 36.6668 67.7206 32.3468 68.4993 28.0194C69.62 21.8683 70.57 15.6742 71.7436 9.53823C71.9807 8.29894 72.5117 6.09248 73.1805 5.09596C73.8422 4.11015 74.7033 3.87248 75.7916 3.68191Z" fill="currentColor"></path>
+      <path d="M56.3321 0.064804C59.1812 -0.316923 61.5675 0.980261 61.1071 4.15556C60.7016 6.95326 59.814 9.69423 59.0959 12.4286L55.4041 26.5034L50.9081 43.5532C50.1018 46.6788 49.3305 49.8112 48.5382 52.9404C48.2579 54.0472 47.683 55.2444 46.4899 55.5904C45.1553 55.9775 43.763 56.2647 42.4062 56.5727L34.6522 58.3369C24.8429 60.6148 14.2181 63.0331 4.3823 64.9265C2.73244 65.1678 0.713898 65.5919 0.50861 63.3424C0.369657 61.8195 0.482801 60.3793 0.563366 58.8571C0.733033 55.9524 0.963835 53.0515 1.25587 50.1566C1.42544 48.3754 1.5905 46.6945 1.7059 44.9085C1.97654 40.7177 1.08493 36.5929 0.944602 32.4871C0.790832 27.9861 1.45773 23.0586 1.70286 18.5264C1.85928 16.4022 1.72984 14.1948 2.01334 12.0941C2.43942 8.93843 5.53318 6.35515 8.59347 5.79188C11.0079 5.34745 14.3501 5.63605 16.9748 5.65254C19.6253 5.67187 22.2743 5.52262 24.9059 5.20565C31.8374 4.35104 38.7416 3.28613 45.6085 2.01249C48.74 1.44579 53.3567 0.406297 56.3321 0.064804Z" fill="currentColor"></path>
+      <path d="M41.0718 69.6369C41.8866 69.4975 43.0372 69.4297 43.7528 69.893C44.2577 70.2199 44.5057 70.7708 44.5983 71.3485C44.9409 73.4848 42.8923 81.1809 42.3648 83.488C41.5708 86.9196 40.7953 90.3551 40.0382 93.7946C36.1424 111.831 33.4185 130.044 29.9412 148.165C29.234 153.541 21.9808 154.229 17.5465 154.998C13.7643 155.654 8.17914 156.205 4.87019 153.744C2.67786 151.467 2.26385 146.559 1.70833 143.474C1.17519 140.513 1.25546 136.692 1.24594 133.655C1.20188 129.511 1.28804 125.367 1.50422 121.228C1.66751 118.076 1.93423 114.742 1.8674 111.598C1.74071 105.638 1.08579 99.6687 0.618495 93.7289C0.358744 90.4287 -0.0428053 87.1237 0.0037085 83.8089C0.0461008 80.8856 0.124901 76.9285 3.71441 76.1791C5.32257 75.8434 6.94937 75.8017 8.58246 75.6657C10.6273 75.482 12.6635 75.2124 14.6858 74.8575C20.8763 73.7108 27.1254 72.1935 33.3263 71.0344C35.9442 70.5451 38.4153 69.9999 41.0718 69.6369Z" fill="currentColor"></path>
+      <path d="M207.624 132V41.12H229.768C237.789 41.12 244.744 42.912 250.632 46.496C256.605 49.9947 261.171 55.1573 264.328 61.984C267.571 68.7253 269.192 76.96 269.192 86.688C269.192 96.416 267.571 104.651 264.328 111.392C261.171 118.133 256.605 123.253 250.632 126.752C244.744 130.251 237.789 132 229.768 132H207.624ZM221.064 119.328H229.384C237.661 119.328 244.019 116.64 248.456 111.264C252.979 105.803 255.24 97.6107 255.24 86.688C255.24 75.7653 252.979 67.5733 248.456 62.112C244.019 56.5653 237.661 53.792 229.384 53.792H221.064V119.328ZM306.646 133.536C300.246 133.536 294.657 132.085 289.878 129.184C285.185 126.283 281.515 122.144 278.87 116.768C276.31 111.392 275.03 105.12 275.03 97.952C275.03 90.784 276.31 84.5547 278.87 79.264C281.515 73.9733 285.142 69.8347 289.75 66.848C294.443 63.8613 299.947 62.368 306.262 62.368C312.321 62.368 317.654 63.8187 322.262 66.72C326.87 69.536 330.454 73.632 333.014 79.008C335.659 84.2987 336.982 90.6987 336.982 98.208V101.792H288.598C289.025 108.277 290.817 113.227 293.974 116.64C297.217 119.968 301.483 121.632 306.774 121.632C310.785 121.632 314.113 120.693 316.758 118.816C319.403 116.853 321.238 114.336 322.262 111.264L335.83 112.16C333.867 118.645 330.326 123.851 325.206 127.776C320.171 131.616 313.985 133.536 306.646 133.536ZM288.598 91.424H323.03C322.518 85.6213 320.726 81.312 317.654 78.496C314.667 75.68 310.87 74.272 306.262 74.272C301.483 74.272 297.558 75.7227 294.486 78.624C291.414 81.5253 289.451 85.792 288.598 91.424ZM377.636 133.536C371.321 133.536 365.732 132.085 360.868 129.184C356.089 126.197 352.377 122.059 349.732 116.768C347.172 111.392 345.892 105.12 345.892 97.952C345.892 90.784 347.172 84.5547 349.732 79.264C352.377 73.9733 356.089 69.8347 360.868 66.848C365.732 63.8613 371.321 62.368 377.636 62.368C382.841 62.368 387.492 63.3493 391.588 65.312C395.684 67.1893 399.055 69.9627 401.7 73.632C404.345 77.3013 406.095 81.696 406.948 86.816L393.764 87.712C392.74 83.36 390.82 80.032 388.004 77.728C385.188 75.424 381.775 74.272 377.764 74.272C372.047 74.272 367.524 76.4053 364.196 80.672C360.953 84.8533 359.332 90.6133 359.332 97.952C359.332 105.291 360.953 111.093 364.196 115.36C367.524 119.541 372.047 121.632 377.764 121.632C381.86 121.632 385.359 120.437 388.26 118.048C391.247 115.573 393.209 111.947 394.148 107.168L407.332 107.936C406.479 113.141 404.687 117.664 401.956 121.504C399.225 125.259 395.769 128.203 391.588 130.336C387.492 132.469 382.841 133.536 377.636 133.536ZM437.234 133.536C432.967 133.536 429.127 132.768 425.714 131.232C422.301 129.696 419.57 127.52 417.522 124.704C415.559 121.888 414.578 118.603 414.578 114.848C414.578 109.045 416.327 104.523 419.826 101.28C423.41 98.0373 428.786 95.7333 435.954 94.368L457.97 89.76C457.97 84.4693 456.818 80.5013 454.514 77.856C452.21 75.2107 448.754 73.888 444.146 73.888C439.879 73.888 436.551 74.8693 434.162 76.832C431.773 78.7947 430.151 81.5253 429.298 85.024L415.73 84.128C417.01 77.6427 420.125 72.3947 425.074 68.384C430.023 64.3733 436.381 62.368 444.146 62.368C452.85 62.368 459.463 64.8427 463.986 69.792C468.594 74.7413 470.898 81.568 470.898 90.272V117.152C470.898 118.688 471.239 119.797 471.922 120.48C472.605 121.077 473.586 121.376 474.866 121.376H478.706V132C478.194 132.085 477.341 132.171 476.146 132.256C475.037 132.341 473.927 132.384 472.818 132.384C469.746 132.384 467.143 131.872 465.01 130.848C462.877 129.824 461.255 128.245 460.146 126.112C459.122 123.893 458.525 121.12 458.354 117.792H460.402C459.89 120.779 458.567 123.467 456.434 125.856C454.301 128.245 451.57 130.123 448.242 131.488C444.914 132.853 441.245 133.536 437.234 133.536ZM439.154 122.912C443.25 122.912 446.706 122.187 449.522 120.736C452.338 119.285 454.429 117.237 455.794 114.592C457.245 111.947 457.97 108.832 457.97 105.248V100L439.026 103.84C434.93 104.608 432.071 105.803 430.45 107.424C428.829 109.045 428.018 111.179 428.018 113.824C428.018 116.64 428.999 118.859 430.962 120.48C432.925 122.101 435.655 122.912 439.154 122.912ZM511.424 133.536C505.621 133.536 500.587 132.128 496.32 129.312C492.053 126.411 488.768 122.315 486.464 117.024C484.16 111.648 483.008 105.291 483.008 97.952C483.008 90.6133 484.16 84.2987 486.464 79.008C488.768 73.632 492.053 69.536 496.32 66.72C500.587 63.8187 505.621 62.368 511.424 62.368C516.203 62.368 520.384 63.4773 523.968 65.696C527.552 67.9147 530.155 70.5173 531.776 73.504V41.12H544.704V132H532.672L532.288 121.504C530.411 125.173 527.68 128.117 524.096 130.336C520.512 132.469 516.288 133.536 511.424 133.536ZM513.6 121.632C517.355 121.632 520.555 120.693 523.2 118.816C525.931 116.853 528.021 114.123 529.472 110.624C531.008 107.04 531.776 102.816 531.776 97.952C531.776 92.9173 531.008 88.6507 529.472 85.152C528.021 81.6533 525.931 78.9653 523.2 77.088C520.469 75.2107 517.184 74.272 513.344 74.272C508.139 74.272 504.043 76.3627 501.056 80.544C498.069 84.7253 496.576 90.528 496.576 97.952C496.576 105.291 498.069 111.093 501.056 115.36C504.043 119.541 508.224 121.632 513.6 121.632ZM576.782 132V63.904H587.022L588.174 81.312L587.022 81.184C587.875 75.296 589.71 70.944 592.526 68.128C595.342 65.312 599.225 63.904 604.174 63.904H618.638V75.168H604.686C601.443 75.168 598.713 75.808 596.494 77.088C594.275 78.2827 592.569 80.1173 591.374 82.592C590.265 84.9813 589.71 87.968 589.71 91.552V132H576.782ZM559.502 132V121.12H610.958V132H559.502ZM559.502 74.784V63.904H584.078V74.784H559.502ZM648.284 133.536C644.017 133.536 640.177 132.768 636.764 131.232C633.351 129.696 630.62 127.52 628.572 124.704C626.609 121.888 625.628 118.603 625.628 114.848C625.628 109.045 627.377 104.523 630.876 101.28C634.46 98.0373 639.836 95.7333 647.004 94.368L669.02 89.76C669.02 84.4693 667.868 80.5013 665.564 77.856C663.26 75.2107 659.804 73.888 655.196 73.888C650.929 73.888 647.601 74.8693 645.212 76.832C642.823 78.7947 641.201 81.5253 640.348 85.024L626.78 84.128C628.06 77.6427 631.175 72.3947 636.124 68.384C641.073 64.3733 647.431 62.368 655.196 62.368C663.9 62.368 670.513 64.8427 675.036 69.792C679.644 74.7413 681.948 81.568 681.948 90.272V117.152C681.948 118.688 682.289 119.797 682.972 120.48C683.655 121.077 684.636 121.376 685.916 121.376H689.756V132C689.244 132.085 688.391 132.171 687.196 132.256C686.087 132.341 684.977 132.384 683.868 132.384C680.796 132.384 678.193 131.872 676.06 130.848C673.927 129.824 672.305 128.245 671.196 126.112C670.172 123.893 669.575 121.12 669.404 117.792H671.452C670.94 120.779 669.617 123.467 667.484 125.856C665.351 128.245 662.62 130.123 659.292 131.488C655.964 132.853 652.295 133.536 648.284 133.536ZM650.204 122.912C654.3 122.912 657.756 122.187 660.572 120.736C663.388 119.285 665.479 117.237 666.844 114.592C668.295 111.947 669.02 108.832 669.02 105.248V100L650.076 103.84C645.98 104.608 643.121 105.803 641.5 107.424C639.879 109.045 639.068 111.179 639.068 113.824C639.068 116.64 640.049 118.859 642.012 120.48C643.975 122.101 646.705 122.912 650.204 122.912Z" fill="currentColor"></path>
+    </svg>
+    <nav class="titlenav">
+      <a href="#why">why</a>
+      <a href="#install">install</a>
+      <a href="#faq">faq</a>
+      <a href="https://github.com/decadra/cli" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path></svg>
+        <span class="label-text">github</span>
+      </a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <h1>Pay for what fits.</h1>
+        <p class="lede">
+          Decadra reads the session logs Claude Code and Codex write locally, prices your usage
+          under every plan the vendor sells, and reports each provider on its own. Nothing leaves
+          your machine.
+        </p>
+
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#install">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"></path></svg>
+            Install
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/decadra/cli" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path></svg>
+            View source
+          </a>
+        </div>
+
+        <div class="feature-row">
+          <span><span class="chk" aria-hidden="true">&#10003;</span> Free for noncommercial use</span>
+          <span><span class="chk" aria-hidden="true">&#10003;</span> Runs locally</span>
+          <span><span class="chk" aria-hidden="true">&#10003;</span> Zero network calls</span>
+          <span><span class="chk" aria-hidden="true">&#10003;</span> Reads your own logs</span>
+        </div>
+
+      </div>
+
+      <div class="term">
+        <div class="term-head">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span class="label">claude code, ! shell</span>
+        </div>
+        <div class="term-body">
+          <div class="term-line"><span class="prompt">!</span><span class="cmd">decadra now</span></div>
+          <div class="rule-thin"></div>
+          <div class="term-row"><span class="k">held</span><span class="v">Max 20x $200.00/mo<span class="dim">baseline 2026-08-01</span></span></div>
+          <div class="term-row"><span class="k">this session</span><span class="v">$1.27 list-equivalent<span class="dim">42 min</span></span></div>
+          <div class="term-row"><span class="k">today</span><span class="v">$18.40 list-equivalent</span></div>
+          <div class="term-row"><span class="k">month to date</span><span class="v">$136.66<span class="dim">0.7x plan price</span></span></div>
+          <div class="term-row"><span class="k">pace</span><span class="v">$421.90 by month end at this rate<span class="dim">12 of 30 days observed</span></span></div>
+          <div class="term-row"><span class="k">ceiling</span><span class="v" style="font-weight:400">no recorded utilization</span></div>
+          <div class="term-row"><span class="k">last verdict</span><span class="v" style="font-weight:600">hold, medium confidence<span class="dim">2026-08-15</span></span></div>
+          <div class="term-note">real field names and shape from the source. Dollar figures are a plausible example, not live data.</div>
+        </div>
+      </div>
+    </div>
+    <div class="tool-strip">
+        <span class="label">works with</span>
+        <div class="tool-badges">
+          <div class="tool-badge" role="img" aria-label="Claude Code, by Anthropic" title="Claude Code, by Anthropic"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184 40" fill="currentColor"><path shape-rendering="optimizeQuality" d="m7.75 26.27 7.77-4.36.13-.38-.13-.21h-.38l-1.3-.08-4.44-.12-3.85-.16-3.73-.2-.94-.2L0 19.4l.09-.58.79-.53 1.13.1 2.5.17 3.75.26 2.72.16 4.03.42h.64l.09-.26-.22-.16-.17-.16-3.88-2.63-4.2-2.78-2.2-1.6L3.88 11l-.6-.76-.26-1.66L4.1 7.39l1.45.1.37.1 1.47 1.13 3.14 2.43 4.1 3.02.6.5.24-.17.03-.12-.27-.45L13 9.9l-2.38-4.1-1.06-1.7-.28-1.02c-.1-.42-.17-.77-.17-1.2L10.34.21l.68-.22 1.64.22.69.6 1.02 2.33 1.65 3.67 2.56 4.99.75 1.48.4 1.37.15.42h.26v-.24l.21-2.81.39-3.45.38-4.44.13-1.25.62-1.5L23.1.57l.96.46.79 1.13-.11.73-.47 3.05-.92 4.78-.6 3.2h.35l.4-.4 1.62-2.15 2.72-3.4 1.2-1.35 1.4-1.49.9-.71h1.7l1.25 1.86-.56 1.92-1.75 2.22-1.45 1.88-2.08 2.8-1.3 2.24.12.18.31-.03 4.7-1 2.54-.46 3.03-.52 1.37.64.15.65-.54 1.33-3.24.8-3.8.76-5.66 1.34-.07.05.08.1 2.55.24 1.09.06h2.67l4.97.37 1.3.86.78 1.05-.13.8-2 1.02-2.7-.64-6.3-1.5-2.16-.54h-.3v.18l1.8 1.76 3.3 2.98 4.13 3.84.21.95-.53.75-.56-.08-3.63-2.73-1.4-1.23-3.17-2.67h-.21v.28l.73 1.07 3.86 5.8.2 1.78-.28.58-1 .35-1.1-.2L26 33.14l-2.33-3.57-1.88-3.2-.23.13-1.11 11.95-.52.61-1.2.46-1-.76-.53-1.23.53-2.43.64-3.17.52-2.52.47-3.13.28-1.04-.02-.07-.23.03-2.36 3.24-3.59 4.85-2.84 3.04-.68.27-1.18-.61.11-1.09.66-.97 3.93-5 2.37-3.1 1.53-1.79-.01-.26h-.09L6.8 30.56l-1.86.24-.8-.75.1-1.23.38-.4 3.14-2.16Z"/><path shape-rendering="optimizeQuality" d="M64.48 33.54c-5.02 0-8.45-2.8-10.07-7.11a19.19 19.19 0 0 1-1.23-7.03c0-7.23 3.24-12.25 10.4-12.25 4.81 0 7.78 2.1 9.47 7.11h2.06l-.28-6.91c-2.88-1.86-6.48-2.8-10.86-2.8-6.17 0-11.42 2.76-14.34 7.74a16.77 16.77 0 0 0-2.22 8.65c0 5.53 2.61 10.43 7.51 13.15a17.51 17.51 0 0 0 8.73 2.06c4.78 0 8.57-.91 11.93-2.5l.87-7.62h-2.1c-1.26 3.48-2.76 5.57-5.25 6.68-1.22.55-2.76.83-4.62.83ZM86.13 7.15l.2-3.4h-1.42l-6.32 1.9v1.03l2.8 1.3v23.78c0 1.62-.83 1.98-3 2.25v1.74h10.75v-1.74c-2.18-.27-3-.63-3-2.25V7.16Zm42.75 29h.83l7.27-1.38v-1.78l-1.02-.08c-1.7-.16-2.14-.51-2.14-1.9V18.33l.2-4.07h-1.15l-6.87.99v1.74l.67.12c1.86.27 2.41.79 2.41 2.09v11.3c-1.78 1.38-3.48 2.25-5.5 2.25-2.24 0-3.63-1.14-3.63-3.8V18.34l.2-4.07h-1.18l-6.88.99v1.74l.71.12c1.86.27 2.41.79 2.41 2.09v10.43c0 4.42 2.5 6.52 6.48 6.52 3.04 0 5.53-1.62 7.4-3.87l-.2 3.87ZM108.9 22.08c0-5.65-3-7.82-8.42-7.82-4.78 0-8.25 1.98-8.25 5.26 0 .98.35 1.73 1.06 2.25l3.64-.48c-.16-1.1-.24-1.77-.24-2.05 0-1.86.99-2.8 3-2.8 2.97 0 4.47 2.09 4.47 5.45v1.1l-7.5 2.25c-2.5.68-3.92 1.27-4.87 2.65a5 5 0 0 0-.7 2.8c0 3.2 2.2 5.46 5.96 5.46 2.72 0 5.13-1.23 7.23-3.56.75 2.33 1.9 3.56 3.95 3.56 1.66 0 3.16-.67 4.5-1.98l-.4-1.38c-.58.16-1.14.24-1.73.24-1.15 0-1.7-.91-1.7-2.69v-8.26Zm-9.6 10.87c-2.05 0-3.32-1.19-3.32-3.28 0-1.42.67-2.25 2.1-2.73l6.08-1.93v5.84c-1.94 1.47-3.08 2.1-4.86 2.1Zm63.3 1.82v-1.78l-1.03-.08c-1.7-.16-2.13-.51-2.13-1.9V7.15l.2-3.4h-1.43l-6.32 1.9v1.03l2.8 1.3v7.82a8.83 8.83 0 0 0-5.37-1.54c-6.28 0-11.18 4.78-11.18 11.93 0 5.89 3.52 9.96 9.32 9.96 3 0 5.61-1.46 7.23-3.72l-.2 3.72h.84l7.27-1.38Zm-13.16-18.14c3 0 5.25 1.74 5.25 4.94v9a7.2 7.2 0 0 1-5.21 2.1c-4.3 0-6.48-3.4-6.48-7.94 0-5.1 2.49-8.1 6.44-8.1Zm28.53 4.5c-.56-2.64-2.18-4.14-4.43-4.14-3.36 0-5.69 2.53-5.69 6.16 0 5.37 2.84 8.85 7.43 8.85a8.6 8.6 0 0 0 7.39-4.35l1.34.36c-.6 4.66-4.82 8.14-10 8.14-6.08 0-10.27-4.5-10.27-10.9 0-6.45 4.55-10.99 10.63-10.99 4.54 0 7.74 2.73 8.77 7.47l-15.84 4.86v-2.14l10.67-3.31Z"/></svg></div><div class="tool-badge" role="img" aria-label="Codex, by OpenAI" title="Codex, by OpenAI"><svg aria-hidden="true" viewBox="0 0 288 78" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M30.6 0.398438C13.77 0.398438 0 14.1684 0 30.9984C0 47.8284 13.77 61.5984 30.6 61.5984C47.43 61.5984 61.2 47.9134 61.2 30.9984C61.2 14.0834 47.515 0.398438 30.6 0.398438ZM30.6 50.6334C20.145 50.6334 11.73 42.0484 11.73 30.9984C11.73 19.9484 20.145 11.3634 30.6 11.3634C41.055 11.3634 49.47 19.9484 49.47 30.9984C49.47 42.0484 41.055 50.6334 30.6 50.6334Z" fill="currentColor"></path><path d="M92.1393 17.3984C86.6143 17.3984 81.2593 19.6084 78.4543 23.3484V18.2484H67.4043V77.7484H78.4543V56.2434C81.2593 59.7284 86.4443 61.5984 92.1393 61.5984C104.039 61.5984 113.389 52.2484 113.389 39.4984C113.389 26.7484 104.039 17.3984 92.1393 17.3984ZM90.2693 51.9934C83.9793 51.9934 78.3693 47.0634 78.3693 39.4984C78.3693 31.9334 83.9793 27.0034 90.2693 27.0034C96.5593 27.0034 102.169 31.9334 102.169 39.4984C102.169 47.0634 96.5593 51.9934 90.2693 51.9934Z" fill="currentColor"></path><path d="M139.401 17.3984C127.331 17.3984 117.811 26.8334 117.811 39.4984C117.811 52.1634 126.141 61.5984 139.741 61.5984C150.876 61.5984 158.016 54.8834 160.226 47.3184H149.431C148.071 50.4634 144.246 52.6734 139.656 52.6734C133.961 52.6734 129.626 48.6784 128.606 42.9834H160.736V38.6484C160.736 27.0884 152.661 17.3984 139.401 17.3984ZM128.691 35.1634C129.881 29.8084 134.301 26.3234 139.656 26.3234C145.351 26.3234 149.686 30.0634 150.196 35.1634H128.691Z" fill="currentColor"></path><path d="M190.145 17.3984C185.215 17.3984 180.03 19.6084 177.65 23.2634V18.2484H166.6V60.7484H177.65V37.8834C177.65 31.2534 181.22 26.9184 187 26.9184C192.355 26.9184 195.245 30.9984 195.245 36.6934V60.7484H206.295V34.9084C206.295 24.3684 199.835 17.3984 190.145 17.3984Z" fill="currentColor"></path><path d="M234.596 1.25L210.541 60.75H222.356L227.456 47.745H254.826L259.926 60.75H271.911L248.026 1.25H234.596ZM231.281 37.885L241.141 12.98L250.916 37.885H231.281Z" fill="currentColor"></path><path d="M287.636 1.25H276.416V60.75H287.636V1.25Z" fill="currentColor"></path></svg></div><span class="tool-sep" aria-hidden="true"></span><div class="tool-badge dim" role="img" aria-label="Cursor, reader planned" title="Cursor, reader planned"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 2193 545" xmlns="http://www.w3.org/2000/svg"><g ><path d="m466.383 137.073-206.469-119.2034c-6.63-3.8287-14.811-3.8287-21.441 0l-206.4586 119.2034c-5.5734 3.218-9.0144 9.169-9.0144 15.615v240.375c0 6.436 3.441 12.397 9.0144 15.615l206.4686 119.203c6.63 3.829 14.811 3.829 21.441 0l206.468-119.203c5.574-3.218 9.015-9.17 9.015-15.615v-240.375c0-6.436-3.441-12.397-9.015-15.615zm-12.969 25.25-199.316 345.223c-1.347 2.326-4.904 1.376-4.904-1.319v-226.048c0-4.517-2.414-8.695-6.33-10.963l-195.7577-113.019c-2.3263-1.347-1.3764-4.905 1.3182-4.905h398.6305c5.661 0 9.199 6.136 6.368 11.041h-.009z" ></path><path d="m723.253 148.84h87.856v48.397h-84.881c-45.789 0-81.527 26.432-81.527 82.273s35.738 82.273 81.527 82.273h84.881v48.397h-91.578c-76.691 0-131.039-45.043-131.039-130.66 0-85.618 58.07-130.661 134.761-130.661z" ></path><path d="m855.781 148.84h54.348v159.7c0 39.828 18.242 58.448 61.056 58.448 42.815 0 61.055-18.61 61.055-58.448v-159.7h54.35v170.866c0 58.071-36.85 94.933-115.405 94.933-78.551 0-115.404-37.231-115.404-95.301z" ></path><path d="m1370.62 222.913c0 29.04-16.75 51.372-39.09 61.056v.746c23.45 3.354 35.37 20.103 35.73 42.814l1.12 82.641h-54.35l-1.11-73.705c-.37-16.381-10.06-26.432-29.41-26.432h-90.47v100.137h-54.34v-261.33h150.02c49.15 0 81.9 24.94 81.9 74.083zm-54.73 7.454c0-22.333-11.91-34.623-34.24-34.623h-88.61v69.236h89.34c20.47 0 33.51-12.281 33.51-34.623z" ></path><path d="m1576.09 333.85c0-18.61-11.91-26.432-29.77-27.915l-60.31-5.583c-52.12-4.837-79.3-25.318-79.3-74.83 0-49.511 33.51-76.69 81.53-76.69h133.27v46.904h-129.55c-18.61 0-30.52 9.683-30.52 28.294 0 18.61 12.28 27.547 30.9 29.04l61.42 5.214c46.54 4.091 77.06 25.318 77.06 75.198s-32.38 76.69-78.17 76.69h-139.23v-46.904h134.01c17.5 0 28.66-11.912 28.66-29.408z" ></path><path d="m1789.79 144.373c81.89 0 133.65 52.487 133.65 134.761 0 82.273-53.98 135.506-135.88 135.506s-133.65-53.233-133.65-135.506c0-82.274 53.98-134.761 135.88-134.761zm77.43 135.129c0-55.095-32.02-87.479-78.56-87.479-46.53 0-78.55 32.384-78.55 87.479 0 55.094 32.02 87.478 78.55 87.478 46.54 0 78.56-32.384 78.56-87.478z" ></path><path d="m2192.95 222.913c0 29.04-16.75 51.372-39.1 61.056v.746c23.46 3.354 35.37 20.103 35.74 42.814l1.12 82.641h-54.35l-1.12-73.705c-.36-16.381-10.05-26.432-29.4-26.432h-90.47v100.137h-54.35v-261.33h150.03c49.14 0 81.9 24.94 81.9 74.083zm-54.73 7.454c0-22.333-11.91-34.623-34.25-34.623h-88.6v69.236h89.34c20.47 0 33.51-12.281 33.51-34.623z" ></path></g></svg></div><div class="tool-badge dim" role="img" aria-label="Devin, by Cognition, reader planned" title="Devin, by Cognition, reader planned"><svg aria-hidden="true" viewBox="0 0 112 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M37.7773 14.8781C37.7986 14.7928 37.8626 14.7715 37.9265 14.7715H39.8021C39.866 14.7715 39.9087 14.7928 39.9087 14.8781C39.9087 16.2851 38.2249 19.6748 33.7705 19.6748C29.0816 19.6748 27.0355 16.477 27.0355 11.9575C27.0355 7.43789 29.5078 4.24009 33.7705 4.24009C38.4167 4.24009 39.9087 7.86426 39.9087 9.03679C39.9087 9.12207 39.866 9.14339 39.8021 9.14339H37.9265C37.8626 9.14339 37.7986 9.10075 37.7773 9.03679C37.4576 8.12009 36.5838 6.05218 33.7705 6.05218C30.7866 6.05218 29.1668 8.26932 29.1668 11.9575C29.1668 15.6456 30.7866 17.8627 33.7705 17.8627C36.328 17.8627 37.4363 16.008 37.7773 14.8781Z" fill="currentColor"></path><path d="M51.1782 14.068C51.1782 17.3937 49.2174 19.6748 45.8925 19.6748C42.5463 19.6748 40.6068 17.3937 40.6068 14.068C40.6068 10.721 42.5463 8.46119 45.8925 8.46119C49.2174 8.46119 51.1782 10.7423 51.1782 14.068ZM49.1534 14.068C49.1534 11.8509 47.9386 10.2733 45.8925 10.2733C43.8677 10.2733 42.6316 11.8509 42.6316 14.068C42.6316 16.2852 43.8677 17.8627 45.8925 17.8627C47.9386 17.8627 49.1534 16.2852 49.1534 14.068Z" fill="currentColor"></path><path d="M54.468 20.7194C54.6386 21.2098 55.4058 22.0838 57.1748 22.0838C59.4127 22.0838 60.2013 20.5489 60.2013 19.0566V18.481C60.2013 18.3957 60.0734 18.3104 59.9882 18.4383C59.7537 18.7368 58.4323 19.6748 56.9404 19.6748C54.0418 19.6748 51.8678 17.3937 51.8678 14.068C51.8678 10.7423 53.8287 8.46119 56.9404 8.46119C58.006 8.46119 59.3914 9.05811 59.9882 9.65504C60.0521 9.71899 60.1587 9.76163 60.2013 9.63372L60.4144 8.78097C60.4357 8.71701 60.4571 8.67438 60.521 8.67438H62.1195C62.1834 8.67438 62.226 8.71701 62.226 8.78097V19.0566C62.226 21.9346 60.18 23.8959 57.1748 23.8959C54.5533 23.8959 52.5712 22.4249 52.4007 20.7194C52.4007 20.6555 52.4433 20.6128 52.5072 20.6128H54.3615C54.4254 20.6128 54.4467 20.6555 54.468 20.7194ZM53.8926 14.068C53.8926 16.2852 55.1074 17.8627 57.1535 17.8627C59.093 17.8627 60.2013 16.2852 60.2013 14.068C60.2013 11.8509 59.093 10.2733 57.1535 10.2733C55.1074 10.2733 53.8926 11.8509 53.8926 14.068Z" fill="currentColor"></path><path d="M64.42 8.67438H66.0185C66.0824 8.67438 66.1037 8.71701 66.125 8.78097L66.3382 9.74031C66.3595 9.86822 66.53 9.82558 66.5726 9.76163C66.9989 9.12207 67.9367 8.46119 69.3646 8.46119C72.4551 8.46119 74.0109 10.721 74.0109 13.4924V19.355C74.0109 19.419 73.9683 19.4616 73.9043 19.4616H72.0927C72.0288 19.4616 71.9862 19.419 71.9862 19.355V13.4924C71.9862 11.8722 71.2615 10.2733 69.1515 10.2733C67.3612 10.2733 66.3382 11.8295 66.3382 13.4924V19.355C66.3382 19.419 66.2955 19.4616 66.2316 19.4616H64.42C64.356 19.4616 64.3134 19.419 64.3134 19.355V8.78097C64.3134 8.71701 64.356 8.67438 64.42 8.67438Z" fill="currentColor"></path><path d="M78.1612 8.78097V19.355C78.1612 19.419 78.1185 19.4616 78.0546 19.4616H76.243C76.179 19.4616 76.1364 19.419 76.1364 19.355V8.78097C76.1364 8.71701 76.179 8.67438 76.243 8.67438H78.0546C78.1185 8.67438 78.1612 8.71701 78.1612 8.78097ZM78.2038 7.3313H76.0725C76.0085 7.3313 75.9659 7.28866 75.9659 7.22471V5.07152C75.9659 5.00756 76.0085 4.96492 76.0725 4.96492H78.2038C78.2677 4.96492 78.3103 5.00756 78.3103 5.07152V7.22471C78.3103 7.28866 78.2677 7.3313 78.2038 7.3313Z" fill="currentColor"></path><path d="M85.3472 17.7561V19.355C85.3472 19.419 85.3046 19.4616 85.2406 19.4616H83.5995C81.8305 19.4616 80.8075 18.6942 80.8075 16.946V10.3799C80.8075 10.3159 80.7649 10.2733 80.7009 10.2733H78.804C78.7401 10.2733 78.6975 10.2306 78.6975 10.1667V8.78097C78.6975 8.71701 78.7401 8.67438 78.804 8.67438H80.7009C80.7649 8.67438 80.8075 8.63174 80.8075 8.56778V5.68976C80.8075 5.6258 80.8501 5.58317 80.9141 5.58317H82.7257C82.7896 5.58317 82.8322 5.6258 82.8322 5.68976V8.56778C82.8322 8.63174 82.8749 8.67438 82.9388 8.67438H85.2406C85.3046 8.67438 85.3472 8.71701 85.3472 8.78097V10.1667C85.3472 10.2306 85.3046 10.2733 85.2406 10.2733H82.9388C82.8749 10.2733 82.8322 10.3159 82.8322 10.3799V16.5836C82.8322 17.2445 83.1306 17.6495 83.9831 17.6495H85.2406C85.3046 17.6495 85.3472 17.6922 85.3472 17.7561Z" fill="currentColor"></path><path d="M88.7362 8.78097V19.355C88.7362 19.419 88.6935 19.4616 88.6296 19.4616H86.818C86.754 19.4616 86.7114 19.419 86.7114 19.355V8.78097C86.7114 8.71701 86.754 8.67438 86.818 8.67438H88.6296C88.6935 8.67438 88.7362 8.71701 88.7362 8.78097ZM88.7788 7.3313H86.6475C86.5835 7.3313 86.5409 7.28866 86.5409 7.22471V5.07152C86.5409 5.00756 86.5835 4.96492 86.6475 4.96492H88.7788C88.8427 4.96492 88.8854 5.00756 88.8854 5.07152V7.22471C88.8854 7.28866 88.8427 7.3313 88.7788 7.3313Z" fill="currentColor"></path><path d="M100.803 14.068C100.803 17.3937 98.8421 19.6748 95.5172 19.6748C92.1711 19.6748 90.2316 17.3937 90.2316 14.068C90.2316 10.721 92.1711 8.46119 95.5172 8.46119C98.8421 8.46119 100.803 10.7423 100.803 14.068ZM98.7782 14.068C98.7782 11.8509 97.5633 10.2733 95.5172 10.2733C93.4925 10.2733 92.2563 11.8509 92.2563 14.068C92.2563 16.2852 93.4925 17.8627 95.5172 17.8627C97.5633 17.8627 98.7782 16.2852 98.7782 14.068Z" fill="currentColor"></path><path d="M102.409 8.67438H104.008C104.071 8.67438 104.093 8.71701 104.114 8.78097L104.327 9.74031C104.349 9.86822 104.519 9.82558 104.562 9.76163C104.988 9.12207 105.926 8.46119 107.354 8.46119C110.444 8.46119 112 10.721 112 13.4924V19.355C112 19.419 111.957 19.4616 111.893 19.4616H110.082C110.018 19.4616 109.975 19.419 109.975 19.355V13.4924C109.975 11.8722 109.251 10.2733 107.141 10.2733C105.35 10.2733 104.327 11.8295 104.327 13.4924V19.355C104.327 19.419 104.285 19.4616 104.221 19.4616H102.409C102.345 19.4616 102.302 19.419 102.302 19.355V8.78097C102.302 8.71701 102.345 8.67438 102.409 8.67438Z" fill="currentColor"></path><path d="M14.493 10.5887C14.9972 10.2989 15.6205 10.2989 16.1247 10.5887L17.4277 11.3413C17.4693 11.3646 17.5145 11.3829 17.5603 11.3956C17.5695 11.3991 17.5786 11.4013 17.5892 11.4027C17.6343 11.4133 17.6802 11.4189 17.7253 11.421H17.7323C17.738 11.421 17.7415 11.421 17.7472 11.4189C17.7888 11.4189 17.8304 11.4118 17.872 11.4027C17.879 11.4027 17.8868 11.4006 17.8938 11.397C17.9375 11.3843 17.9806 11.366 18.0207 11.3448C18.0243 11.3427 18.0299 11.3413 18.0334 11.3392L20.6382 9.83407C20.825 9.72687 20.9392 9.52797 20.9392 9.31215V6.30261C20.9392 6.08678 20.825 5.88718 20.6382 5.78068L18.0334 4.27556C17.8466 4.16835 17.6167 4.16835 17.4299 4.27556L14.8251 5.78068C14.8251 5.78068 14.8181 5.78632 14.8146 5.78774C14.7751 5.81101 14.7363 5.84063 14.7038 5.87308C14.6982 5.87872 14.6947 5.88366 14.689 5.8893C14.6601 5.92033 14.6347 5.95489 14.6115 5.99086C14.6079 5.99651 14.6044 6.00144 14.6009 6.0092C14.579 6.0494 14.5607 6.09102 14.548 6.13616C14.5445 6.14533 14.5424 6.15449 14.541 6.16507C14.5304 6.21021 14.5226 6.25747 14.5226 6.30684V7.81196C14.5226 8.39243 14.211 8.9341 13.7068 9.22398C13.2026 9.51386 12.5793 9.51386 12.0751 9.22398L10.7721 8.47142C10.7305 8.44815 10.6853 8.42981 10.6395 8.41711C10.6303 8.41359 10.6212 8.41147 10.6106 8.41006C10.5655 8.39948 10.5196 8.39384 10.4745 8.39172H10.4548C10.4111 8.39172 10.3695 8.39878 10.3279 8.40794C10.3208 8.40794 10.313 8.41006 10.3081 8.41147C10.263 8.42417 10.2214 8.44251 10.1791 8.46437C10.1755 8.46649 10.1699 8.4679 10.1664 8.47001L7.56165 9.97513C7.3748 10.0823 7.26057 10.2812 7.26057 10.4971V13.5066C7.26057 13.7224 7.3748 13.922 7.56165 14.0285L10.1664 15.5336C10.1664 15.5336 10.1755 15.5372 10.1791 15.5393C10.2207 15.5612 10.2623 15.5795 10.3081 15.5922C10.3152 15.5943 10.3229 15.5957 10.33 15.5978C10.3716 15.607 10.4132 15.6126 10.4548 15.614C10.4604 15.614 10.4639 15.6162 10.4696 15.6162H10.4766C10.5218 15.6162 10.5676 15.6091 10.6127 15.5978C10.6219 15.5957 10.6311 15.5922 10.6416 15.5908C10.6868 15.5781 10.7305 15.5597 10.7742 15.5365L12.0773 14.7839C12.5814 14.494 13.2048 14.494 13.7082 14.7839C14.2103 15.0738 14.524 15.6162 14.524 16.1966V17.7018C14.524 17.7504 14.5311 17.7977 14.5424 17.8428C14.5445 17.852 14.5459 17.8626 14.5494 17.8717C14.5621 17.9155 14.5804 17.9585 14.6016 17.9987C14.6051 18.0043 14.6087 18.0093 14.6129 18.017C14.6347 18.053 14.6601 18.0876 14.6912 18.1186C14.6968 18.1242 14.7003 18.1292 14.706 18.1348C14.7384 18.1673 14.7765 18.1948 14.8167 18.2202C14.8202 18.2223 14.8237 18.2258 14.8272 18.2272L17.432 19.7323C17.5243 19.7866 17.6294 19.8141 17.7331 19.8141C17.8367 19.8141 17.9418 19.7866 18.0341 19.7323L20.6389 18.2272C20.8257 18.12 20.94 17.9211 20.94 17.7053V14.6957C20.94 14.4799 20.8257 14.2803 20.6389 14.1738L18.0341 12.6687C18.0341 12.6687 18.025 12.6652 18.0215 12.6631C17.9798 12.6412 17.9382 12.6229 17.8931 12.6102C17.8861 12.6087 17.8804 12.6087 17.8734 12.6066C17.8318 12.596 17.7881 12.5904 17.7465 12.5904H17.7267C17.6816 12.5904 17.6365 12.5975 17.5906 12.6087C17.5815 12.6109 17.5723 12.6144 17.5638 12.6158C17.5187 12.6285 17.475 12.6468 17.4313 12.6701L16.1282 13.4227C15.6261 13.7125 15.0007 13.7125 14.4972 13.4227C13.9952 13.1328 13.6814 12.5904 13.6814 12.0099C13.6814 11.4295 13.9931 10.8878 14.4972 10.5972L14.4951 10.5902L14.493 10.5887Z" fill="currentColor"></path><path d="M0.30176 9.83689L2.90648 11.342C2.99886 11.3963 3.10392 11.4238 3.20757 11.4238C3.31123 11.4238 3.41629 11.3963 3.50866 11.342L6.11338 9.83689C6.11338 9.83689 6.12044 9.83125 6.12396 9.82984C6.16415 9.80657 6.20153 9.77694 6.23467 9.7445C6.24031 9.73886 6.24383 9.73392 6.24947 9.72828C6.27838 9.69725 6.30377 9.66268 6.32774 9.62671C6.33127 9.62107 6.33479 9.61613 6.33832 9.60837C6.36018 9.56817 6.37851 9.52656 6.3912 9.48142C6.39473 9.47225 6.39684 9.46308 6.39825 9.4525C6.40883 9.40736 6.41659 9.36011 6.41659 9.31144V7.80632C6.41659 7.22585 6.72825 6.68418 7.23242 6.3943C7.73658 6.10442 8.35991 6.10442 8.86407 6.3943L10.1671 7.14686C10.2087 7.17013 10.2539 7.18847 10.2997 7.20117C10.3089 7.20469 10.318 7.20681 10.3286 7.20822C10.3737 7.2188 10.4175 7.22444 10.4647 7.22656H10.4718C10.4774 7.22656 10.4809 7.22444 10.4866 7.22444C10.5282 7.22444 10.5698 7.21739 10.6114 7.20822C10.6184 7.20822 10.6262 7.20611 10.6332 7.20258C10.6784 7.18988 10.72 7.17155 10.7623 7.14968C10.7658 7.14827 10.7714 7.14616 10.775 7.14404L13.3797 5.63892C13.5665 5.53171 13.6808 5.33281 13.6808 5.11699V2.10745C13.6808 1.89163 13.5665 1.69203 13.3797 1.58553L10.775 0.0804048C10.5881 -0.0268016 10.3582 -0.0268016 10.1714 0.0804048L7.56664 1.58553C7.56664 1.58553 7.55959 1.59117 7.55607 1.59258C7.51658 1.61585 7.4785 1.64548 7.44536 1.67792C7.43972 1.68356 7.4362 1.6885 7.43056 1.69414C7.40165 1.72518 7.37626 1.75974 7.35229 1.79571C7.34876 1.80135 7.34523 1.80629 7.34171 1.81405C7.31985 1.85425 7.30152 1.89586 7.28883 1.941C7.2853 1.95017 7.28318 1.95934 7.28177 1.96992C7.27049 2.01506 7.26344 2.06231 7.26344 2.11168V3.61681C7.26344 4.19727 6.95178 4.73895 6.44761 5.02953C5.94557 5.31941 5.32012 5.31941 4.81596 5.02953L3.51289 4.27697C3.47129 4.2537 3.42616 4.23536 3.38033 4.22266C3.37116 4.21914 3.36199 4.21702 3.35142 4.21561C3.30629 4.20503 3.26046 4.19939 3.21533 4.19727H3.19559C3.15187 4.19727 3.11027 4.20433 3.06866 4.21349C3.06161 4.21349 3.05386 4.21561 3.04892 4.21702C3.00379 4.22972 2.96219 4.24805 2.91988 4.26992C2.91636 4.27203 2.91072 4.27345 2.90719 4.27556L0.302465 5.78068C0.115607 5.88789 0.00137719 6.08679 0.00137719 6.30261V9.31215C0.00137719 9.52797 0.115607 9.72757 0.302465 9.83407L0.30176 9.83689Z" fill="currentColor"></path><path d="M13.3762 18.3583L10.7715 16.8531C10.7715 16.8531 10.7623 16.8496 10.7588 16.8475C10.7172 16.8256 10.6756 16.808 10.6297 16.7953C10.6227 16.7932 10.6149 16.7918 10.6079 16.7897C10.5663 16.7805 10.5247 16.7734 10.481 16.7734H10.4612C10.4161 16.7734 10.3702 16.7805 10.3251 16.7918C10.316 16.7939 10.3068 16.7974 10.2976 16.7988C10.2525 16.8115 10.2088 16.8299 10.1651 16.8531L8.86199 17.6057C8.35994 17.8956 7.7345 17.8956 7.23245 17.6057C6.72829 17.3158 6.41662 16.7734 6.41662 16.193V14.6879C6.41662 14.6392 6.40957 14.5919 6.39829 14.5461C6.39688 14.5369 6.39476 14.5263 6.39124 14.5172C6.37855 14.4734 6.36021 14.4304 6.33835 14.3902C6.33483 14.3846 6.3313 14.3796 6.32778 14.3719C6.30592 14.3359 6.28053 14.3013 6.24951 14.2703C6.24387 14.2647 6.24034 14.2597 6.23541 14.2541C6.20297 14.2216 6.16489 14.1941 6.1247 14.1687C6.12117 14.1666 6.11765 14.1631 6.11412 14.1617L3.5094 12.6566C3.32254 12.5494 3.09267 12.5494 2.90581 12.6566L0.301088 14.1617C0.11423 14.2689 0 14.4678 0 14.6836V17.6932C0 17.909 0.11423 18.1086 0.301088 18.2151L2.90581 19.7202C2.90581 19.7202 2.91498 19.7237 2.9185 19.7258C2.96011 19.7477 3.00171 19.7653 3.04543 19.778C3.05248 19.7802 3.06023 19.7816 3.06729 19.7837C3.10889 19.7929 3.14908 19.7985 3.19209 19.7999C3.19773 19.7999 3.20267 19.8013 3.2069 19.8013H3.21395C3.25908 19.8013 3.30491 19.7943 3.34793 19.783C3.35709 19.7809 3.36767 19.7773 3.37684 19.7759C3.42196 19.7632 3.46568 19.7449 3.5094 19.7216L4.81247 18.9691C5.31663 18.6792 5.93996 18.6792 6.44412 18.9691C6.94617 19.2589 7.25995 19.8013 7.25995 20.3818V21.8869C7.25995 21.9356 7.267 21.9828 7.27828 22.0287C7.2804 22.0378 7.28181 22.0484 7.28533 22.0576C7.29802 22.1013 7.31636 22.1443 7.33822 22.1845C7.34174 22.1902 7.34527 22.1951 7.34879 22.2029C7.37065 22.2389 7.39604 22.2734 7.42706 22.3044C7.4327 22.3101 7.43623 22.315 7.44116 22.3207C7.4736 22.3531 7.51168 22.3806 7.55187 22.406C7.5554 22.4081 7.55892 22.4117 7.56315 22.4131L10.1679 23.9182C10.2602 23.9725 10.3653 24 10.469 24C10.5726 24 10.6777 23.9725 10.7701 23.9182L13.3748 22.4131C13.5616 22.3059 13.6759 22.107 13.6759 21.8911V18.8816C13.6759 18.6658 13.5616 18.4662 13.3748 18.3597L13.3762 18.3583Z" fill="currentColor"></path></svg></div><div class="tool-badge dim" role="img" aria-label="Muse Code, by Meta, reader planned" title="Muse Code, by Meta, reader planned"><svg aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="900 950 5250 1150"><defs><style> .mtcls-1{fill:none;}.mtcls-2{fill:currentColor;} </style></defs><g id="Wordmark"><path d="M2821.4144,1032.1316H3009.49L3329.2876,1610.62l319.793-578.4879h184.0048V1982.696H3679.6382V1254.16l-280.4166,504.4785H3255.2782L2974.8616,1254.16v728.536H2821.4144Z"></path><path d="M4328.0428,1999.6744q-106.6049,0-187.3953-47.1892-80.8056-47.1891-125.95-130.7024-45.16-83.5176-45.1515-191.4708,0-109.31,44.1326-193.5086,44.1325-84.1809,122.5557-131.7256,78.4253-47.5143,180.2675-47.5273,101.1615,0,174.1586,47.8655,72.9753,47.8785,112.3669,134.1016,39.372,86.2359,39.3807,202.3359v42.09H4121.6357q14.262,86.9254,70.2765,136.8157,56.0144,49.9076,141.5631,49.9033,68.5727,0,118.1421-20.3689,49.5564-20.3688,93.0213-61.7829l81.4754,99.8065Q4504.5643,1999.683,4328.0428,1999.6744ZM4440.0759,1435.78q-48.2167-49.2181-126.2887-49.2269-76.0516,0-127.3076,50.25-51.2733,50.2458-64.8439,135.1161h373.4378Q4488.2774,1485.0071,4440.0759,1435.78Z"></path><path d="M4828.4631,1400.1412H4687.2337V1274.5289h141.2294V1066.7647h148.0146v207.7642h214.5538v125.6123H4976.4777v318.4359q0,79.4334,27.1585,113.3858,27.1455,33.9612,93.0213,33.9481,29.181,0,49.5651-2.3759,20.3688-2.3673,44.8089-6.4515v124.251a419.4353,419.4353,0,0,1-56.6929,12.2265,446.1821,446.1821,0,0,1-66.201,4.7519q-239.6854,0-239.6745-262.0812Z"></path><path d="M5962.3646,1982.696H5817.0641v-99.13q-38.7021,55.6827-98.4495,85.8891-59.7539,30.2022-135.7968,30.22-93.6954,0-166.0075-47.8742-72.3121-47.8656-113.7284-131.717-41.4205-83.8557-41.4184-191.809,0-108.6339,42.0991-192.1558,42.09-83.5046,116.4425-131.0406,74.3476-47.5143,170.7594-47.5273,72.65,0,130.3642,28.1817a257.7339,257.7339,0,0,1,95.7354,79.7759v-90.9792h145.3005ZM5814.35,1522.3544q-23.7767-60.43-75.0284-95.4015-51.2733-34.9628-118.48-34.9627-95.0676,0-151.4094,63.8207-56.3656,63.825-56.3547,172.4633,0,109.3235,54.3169,173.14,54.3105,63.8251,147.3383,63.8208,68.566,0,122.2132-35.31,53.6275-35.288,77.4043-95.0548Z"></path></g><g id="Symbol"><path d="M2080,1000c-123.3911,0-219.8478,92.936-307.164,210.9931C1652.8473,1058.2153,1552.5,1000,1432.4138,1000,1187.5862,1000,1000,1318.6207,1000,1655.8621,1000,1866.8965,1102.0956,2000,1273.1035,2000c123.0805,0,211.6-58.0259,368.9655-333.1034,0,0,65.5973-115.8413,110.7249-195.6386q23.72,38.2978,49.9647,82.5351l73.7931,124.1379C2020.2989,1918.4789,2100.39,2000,2245.5172,2000c166.5959,0,259.31-134.9233,259.31-350.3448C2504.8276,1296.5517,2313.0118,1000,2080,1000ZM1522.069,1592.4138c-127.5862,200-171.7242,244.8276-242.7587,244.8276-73.1034,0-116.5517-64.1784-116.5517-178.6207,0-244.8276,122.069-495.1724,267.5862-495.1724,78.8013,0,144.6539,45.51,245.5224,189.9131C1580.088,1500.2723,1522.069,1592.4138,1522.069,1592.4138Zm481.5283-25.178-88.23-147.1481q-35.8152-58.2482-68.8384-107.23c79.52-122.7353,145.1135-183.8919,223.1261-183.8919,162.0691,0,291.7243,238.6207,291.7243,531.7241,0,111.7242-36.5935,176.5518-112.4139,176.5518C2176.2949,1837.2414,2141.5787,1789.2474,2003.5973,1567.2358Z"></path></g></svg></div>
+        </div>
+      </div>
+  </div>
+  </section>
+
+  <section id="why">
+    <div class="wrap">
+    <div class="section-head">
+      <h2>Why it exists</h2>
+      <p>
+        Token counts measure consumption, not output, and the units differ between vendors.
+        So Decadra never sums or ranks them. It gives every provider its own block, and one
+        opinion about that provider's own plans.
+      </p>
+    </div>
+
+    <div class="value-grid">
+      <div class="value-cell">
+        <h3>Runs inside the agent's shell</h3>
+        <p>
+          Run <code>!decadra now</code> from the <code>!</code> shell in Claude Code or Codex.
+          It prints one block in about 200 milliseconds: this session so far, today, and month to
+          date against the plan you hold. No browser tab, no lost context.
+        </p>
+      </div>
+      <div class="value-cell">
+        <h3>Where your usage sits against every tier</h3>
+        <p>
+          <code>decadra assess</code> prices your list-equivalent usage under every plan the
+          vendor sells, so you can see whether a flat-rate tier is comfortably covering you or
+          barely keeping up.
+        </p>
+      </div>
+      <div class="value-cell">
+        <h3>Each provider, its own math</h3>
+        <p>
+          Claude Code tokens and Codex tokens aren't the same unit, so Decadra never adds them
+          up or ranks them. Each gets its own block. The only number that spans providers is
+          what you paid, not what you used.
+        </p>
+      </div>
+      <div class="value-cell">
+        <h3>Local reads, offline by default</h3>
+        <p>
+          Token and cost math run through ccusage, always <code>--offline</code>. Decadra makes
+          zero network calls today. An opt-in price-refresh command is planned for a later
+          release.
+        </p>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:44px;">
+      <table class="matrix">
+        <caption class="caption-note">what each tool's own usage view already does, checked against public docs, Sept 2026. This changes; verify against the vendor.</caption>
+        <thead>
+          <tr><th>tool</th><th>native usage view</th><th>from the agent shell</th><th>prices it against other plans</th><th>no separate login</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Claude Code</td><td><code>/usage</code>: quota bars, burn rate, reset time</td><td><span class="chk" aria-hidden="true">&#10003;</span><span class="sr-only">yes</span></td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td><td><span class="chk" aria-hidden="true">&#10003;</span><span class="sr-only">yes</span></td></tr>
+          <tr><td>Codex</td><td><code>/status</code> or a web dashboard: quota %, reset time</td><td><span class="chk" aria-hidden="true">&#10003;</span><span class="sr-only">yes</span></td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td><td><span class="chk" aria-hidden="true">&#10003;</span><span class="sr-only">yes</span></td></tr>
+          <tr><td>Cursor</td><td>web dashboard; a balance figure in editor settings</td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td></tr>
+          <tr><td>Devin</td><td>web dashboard: ACU balance per task</td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td></tr>
+          <tr><td>Muse Code</td><td>not publicly confirmed as of this writing</td><td><span class="chk chk-unknown" aria-hidden="true">&#8212;</span><span class="sr-only">unconfirmed</span></td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td><td><span class="chk chk-no" aria-hidden="true">&#10005;</span><span class="sr-only">no</span></td></tr>
+          <tr class="tr-highlight"><td>Decadra</td><td><code>decadra now</code>: one command, Claude Code and Codex today</td><td><span class="chk" aria-hidden="true">&#10003;</span><span class="sr-only">yes</span></td><td><span class="chk" aria-hidden="true">&#10003;</span><span class="sr-only">yes</span></td><td><span class="chk" aria-hidden="true">&#10003;</span><span class="sr-only">yes</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  </section>
+
+
+  <section id="install">
+    <div class="wrap">
+    <div class="section-head">
+      <h2>Get it running</h2>
+    </div>
+
+    <div class="install-grid">
+      <div class="term">
+        <div class="term-head">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span class="label">sh</span>
+        </div>
+        <div class="term-body">
+          <div class="copy-row">
+            <span class="cmd-text"><span class="prompt">$</span> git clone https://github.com/decadra/cli</span>
+            <button class="copy-btn" data-copy="git clone https://github.com/decadra/cli">copy</button>
+          </div>
+          <div class="copy-row">
+            <span class="cmd-text"><span class="prompt">$</span> cd decadra &amp;&amp; npm install &amp;&amp; npm run build</span>
+            <button class="copy-btn" data-copy="cd decadra && npm install && npm run build">copy</button>
+          </div>
+          <div class="copy-row">
+            <span class="cmd-text"><span class="prompt">$</span> node dist/cli.js doctor</span>
+            <button class="copy-btn" data-copy="node dist/cli.js doctor">copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <ul class="req-list">
+          <li><b>Node.js</b> 22.13 or later</li>
+          <li><b>Today:</b> build from source (left). v0.4.0 is unreleased, not yet on npm.</li>
+          <li><b>Once published:</b> <code>npm install -g decadra</code> gives you the <code>decadra</code> command directly</li>
+          <li><b>First run</b> writes <code>~/.decadra/plans.json</code> with plan prices as of 2026-09-05, hand maintained, never overwritten</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:44px;">
+      <table>
+        <caption>core commands</caption>
+        <thead>
+          <tr><th>command</th><th>what it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>decadra now</code></td><td>this session, today, and month to date against the plan you hold</td></tr>
+          <tr><td><code>decadra baseline add</code></td><td>record what you pay for today, append only</td></tr>
+          <tr><td><code>decadra assess</code></td><td>effective cost under every plan the vendor sells, one provider at a time</td></tr>
+          <tr><td><code>decadra sessions</code></td><td>turns, duration, and commit signals per session, medians per provider</td></tr>
+          <tr><td><code>decadra doctor</code></td><td>checks config, local data, pricing coverage, git, and ccusage</td></tr>
+          <tr><td><code>decadra alerts check</code></td><td>plan-change alerts from stored verdict history, quiet unless one fires</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap" style="margin-top:44px;">
+      <table>
+        <caption>provider support</caption>
+        <thead>
+          <tr><th>provider</th><th>commands that produce data</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="prov"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184 40" fill="currentColor"><path shape-rendering="optimizeQuality" d="m7.75 26.27 7.77-4.36.13-.38-.13-.21h-.38l-1.3-.08-4.44-.12-3.85-.16-3.73-.2-.94-.2L0 19.4l.09-.58.79-.53 1.13.1 2.5.17 3.75.26 2.72.16 4.03.42h.64l.09-.26-.22-.16-.17-.16-3.88-2.63-4.2-2.78-2.2-1.6L3.88 11l-.6-.76-.26-1.66L4.1 7.39l1.45.1.37.1 1.47 1.13 3.14 2.43 4.1 3.02.6.5.24-.17.03-.12-.27-.45L13 9.9l-2.38-4.1-1.06-1.7-.28-1.02c-.1-.42-.17-.77-.17-1.2L10.34.21l.68-.22 1.64.22.69.6 1.02 2.33 1.65 3.67 2.56 4.99.75 1.48.4 1.37.15.42h.26v-.24l.21-2.81.39-3.45.38-4.44.13-1.25.62-1.5L23.1.57l.96.46.79 1.13-.11.73-.47 3.05-.92 4.78-.6 3.2h.35l.4-.4 1.62-2.15 2.72-3.4 1.2-1.35 1.4-1.49.9-.71h1.7l1.25 1.86-.56 1.92-1.75 2.22-1.45 1.88-2.08 2.8-1.3 2.24.12.18.31-.03 4.7-1 2.54-.46 3.03-.52 1.37.64.15.65-.54 1.33-3.24.8-3.8.76-5.66 1.34-.07.05.08.1 2.55.24 1.09.06h2.67l4.97.37 1.3.86.78 1.05-.13.8-2 1.02-2.7-.64-6.3-1.5-2.16-.54h-.3v.18l1.8 1.76 3.3 2.98 4.13 3.84.21.95-.53.75-.56-.08-3.63-2.73-1.4-1.23-3.17-2.67h-.21v.28l.73 1.07 3.86 5.8.2 1.78-.28.58-1 .35-1.1-.2L26 33.14l-2.33-3.57-1.88-3.2-.23.13-1.11 11.95-.52.61-1.2.46-1-.76-.53-1.23.53-2.43.64-3.17.52-2.52.47-3.13.28-1.04-.02-.07-.23.03-2.36 3.24-3.59 4.85-2.84 3.04-.68.27-1.18-.61.11-1.09.66-.97 3.93-5 2.37-3.1 1.53-1.79-.01-.26h-.09L6.8 30.56l-1.86.24-.8-.75.1-1.23.38-.4 3.14-2.16Z"/><path shape-rendering="optimizeQuality" d="M64.48 33.54c-5.02 0-8.45-2.8-10.07-7.11a19.19 19.19 0 0 1-1.23-7.03c0-7.23 3.24-12.25 10.4-12.25 4.81 0 7.78 2.1 9.47 7.11h2.06l-.28-6.91c-2.88-1.86-6.48-2.8-10.86-2.8-6.17 0-11.42 2.76-14.34 7.74a16.77 16.77 0 0 0-2.22 8.65c0 5.53 2.61 10.43 7.51 13.15a17.51 17.51 0 0 0 8.73 2.06c4.78 0 8.57-.91 11.93-2.5l.87-7.62h-2.1c-1.26 3.48-2.76 5.57-5.25 6.68-1.22.55-2.76.83-4.62.83ZM86.13 7.15l.2-3.4h-1.42l-6.32 1.9v1.03l2.8 1.3v23.78c0 1.62-.83 1.98-3 2.25v1.74h10.75v-1.74c-2.18-.27-3-.63-3-2.25V7.16Zm42.75 29h.83l7.27-1.38v-1.78l-1.02-.08c-1.7-.16-2.14-.51-2.14-1.9V18.33l.2-4.07h-1.15l-6.87.99v1.74l.67.12c1.86.27 2.41.79 2.41 2.09v11.3c-1.78 1.38-3.48 2.25-5.5 2.25-2.24 0-3.63-1.14-3.63-3.8V18.34l.2-4.07h-1.18l-6.88.99v1.74l.71.12c1.86.27 2.41.79 2.41 2.09v10.43c0 4.42 2.5 6.52 6.48 6.52 3.04 0 5.53-1.62 7.4-3.87l-.2 3.87ZM108.9 22.08c0-5.65-3-7.82-8.42-7.82-4.78 0-8.25 1.98-8.25 5.26 0 .98.35 1.73 1.06 2.25l3.64-.48c-.16-1.1-.24-1.77-.24-2.05 0-1.86.99-2.8 3-2.8 2.97 0 4.47 2.09 4.47 5.45v1.1l-7.5 2.25c-2.5.68-3.92 1.27-4.87 2.65a5 5 0 0 0-.7 2.8c0 3.2 2.2 5.46 5.96 5.46 2.72 0 5.13-1.23 7.23-3.56.75 2.33 1.9 3.56 3.95 3.56 1.66 0 3.16-.67 4.5-1.98l-.4-1.38c-.58.16-1.14.24-1.73.24-1.15 0-1.7-.91-1.7-2.69v-8.26Zm-9.6 10.87c-2.05 0-3.32-1.19-3.32-3.28 0-1.42.67-2.25 2.1-2.73l6.08-1.93v5.84c-1.94 1.47-3.08 2.1-4.86 2.1Zm63.3 1.82v-1.78l-1.03-.08c-1.7-.16-2.13-.51-2.13-1.9V7.15l.2-3.4h-1.43l-6.32 1.9v1.03l2.8 1.3v7.82a8.83 8.83 0 0 0-5.37-1.54c-6.28 0-11.18 4.78-11.18 11.93 0 5.89 3.52 9.96 9.32 9.96 3 0 5.61-1.46 7.23-3.72l-.2 3.72h.84l7.27-1.38Zm-13.16-18.14c3 0 5.25 1.74 5.25 4.94v9a7.2 7.2 0 0 1-5.21 2.1c-4.3 0-6.48-3.4-6.48-7.94 0-5.1 2.49-8.1 6.44-8.1Zm28.53 4.5c-.56-2.64-2.18-4.14-4.43-4.14-3.36 0-5.69 2.53-5.69 6.16 0 5.37 2.84 8.85 7.43 8.85a8.6 8.6 0 0 0 7.39-4.35l1.34.36c-.6 4.66-4.82 8.14-10 8.14-6.08 0-10.27-4.5-10.27-10.9 0-6.45 4.55-10.99 10.63-10.99 4.54 0 7.74 2.73 8.77 7.47l-15.84 4.86v-2.14l10.67-3.31Z"/></svg>Claude Code</span></td><td><span class="feat"><span class="yes">now</span><span class="yes">assess</span><span class="yes">sessions</span><span class="yes">doctor</span></span></td></tr>
+          <tr><td><span class="prov"><svg aria-hidden="true" viewBox="0 0 288 78" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M30.6 0.398438C13.77 0.398438 0 14.1684 0 30.9984C0 47.8284 13.77 61.5984 30.6 61.5984C47.43 61.5984 61.2 47.9134 61.2 30.9984C61.2 14.0834 47.515 0.398438 30.6 0.398438ZM30.6 50.6334C20.145 50.6334 11.73 42.0484 11.73 30.9984C11.73 19.9484 20.145 11.3634 30.6 11.3634C41.055 11.3634 49.47 19.9484 49.47 30.9984C49.47 42.0484 41.055 50.6334 30.6 50.6334Z" fill="currentColor"></path><path d="M92.1393 17.3984C86.6143 17.3984 81.2593 19.6084 78.4543 23.3484V18.2484H67.4043V77.7484H78.4543V56.2434C81.2593 59.7284 86.4443 61.5984 92.1393 61.5984C104.039 61.5984 113.389 52.2484 113.389 39.4984C113.389 26.7484 104.039 17.3984 92.1393 17.3984ZM90.2693 51.9934C83.9793 51.9934 78.3693 47.0634 78.3693 39.4984C78.3693 31.9334 83.9793 27.0034 90.2693 27.0034C96.5593 27.0034 102.169 31.9334 102.169 39.4984C102.169 47.0634 96.5593 51.9934 90.2693 51.9934Z" fill="currentColor"></path><path d="M139.401 17.3984C127.331 17.3984 117.811 26.8334 117.811 39.4984C117.811 52.1634 126.141 61.5984 139.741 61.5984C150.876 61.5984 158.016 54.8834 160.226 47.3184H149.431C148.071 50.4634 144.246 52.6734 139.656 52.6734C133.961 52.6734 129.626 48.6784 128.606 42.9834H160.736V38.6484C160.736 27.0884 152.661 17.3984 139.401 17.3984ZM128.691 35.1634C129.881 29.8084 134.301 26.3234 139.656 26.3234C145.351 26.3234 149.686 30.0634 150.196 35.1634H128.691Z" fill="currentColor"></path><path d="M190.145 17.3984C185.215 17.3984 180.03 19.6084 177.65 23.2634V18.2484H166.6V60.7484H177.65V37.8834C177.65 31.2534 181.22 26.9184 187 26.9184C192.355 26.9184 195.245 30.9984 195.245 36.6934V60.7484H206.295V34.9084C206.295 24.3684 199.835 17.3984 190.145 17.3984Z" fill="currentColor"></path><path d="M234.596 1.25L210.541 60.75H222.356L227.456 47.745H254.826L259.926 60.75H271.911L248.026 1.25H234.596ZM231.281 37.885L241.141 12.98L250.916 37.885H231.281Z" fill="currentColor"></path><path d="M287.636 1.25H276.416V60.75H287.636V1.25Z" fill="currentColor"></path></svg>Codex</span></td><td><span class="feat"><span class="yes">now</span><span class="yes">assess</span><span class="yes">sessions</span><span class="yes">doctor</span></span></td></tr>
+          <tr><td><span class="prov"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 2193 545" xmlns="http://www.w3.org/2000/svg"><g ><path d="m466.383 137.073-206.469-119.2034c-6.63-3.8287-14.811-3.8287-21.441 0l-206.4586 119.2034c-5.5734 3.218-9.0144 9.169-9.0144 15.615v240.375c0 6.436 3.441 12.397 9.0144 15.615l206.4686 119.203c6.63 3.829 14.811 3.829 21.441 0l206.468-119.203c5.574-3.218 9.015-9.17 9.015-15.615v-240.375c0-6.436-3.441-12.397-9.015-15.615zm-12.969 25.25-199.316 345.223c-1.347 2.326-4.904 1.376-4.904-1.319v-226.048c0-4.517-2.414-8.695-6.33-10.963l-195.7577-113.019c-2.3263-1.347-1.3764-4.905 1.3182-4.905h398.6305c5.661 0 9.199 6.136 6.368 11.041h-.009z" ></path><path d="m723.253 148.84h87.856v48.397h-84.881c-45.789 0-81.527 26.432-81.527 82.273s35.738 82.273 81.527 82.273h84.881v48.397h-91.578c-76.691 0-131.039-45.043-131.039-130.66 0-85.618 58.07-130.661 134.761-130.661z" ></path><path d="m855.781 148.84h54.348v159.7c0 39.828 18.242 58.448 61.056 58.448 42.815 0 61.055-18.61 61.055-58.448v-159.7h54.35v170.866c0 58.071-36.85 94.933-115.405 94.933-78.551 0-115.404-37.231-115.404-95.301z" ></path><path d="m1370.62 222.913c0 29.04-16.75 51.372-39.09 61.056v.746c23.45 3.354 35.37 20.103 35.73 42.814l1.12 82.641h-54.35l-1.11-73.705c-.37-16.381-10.06-26.432-29.41-26.432h-90.47v100.137h-54.34v-261.33h150.02c49.15 0 81.9 24.94 81.9 74.083zm-54.73 7.454c0-22.333-11.91-34.623-34.24-34.623h-88.61v69.236h89.34c20.47 0 33.51-12.281 33.51-34.623z" ></path><path d="m1576.09 333.85c0-18.61-11.91-26.432-29.77-27.915l-60.31-5.583c-52.12-4.837-79.3-25.318-79.3-74.83 0-49.511 33.51-76.69 81.53-76.69h133.27v46.904h-129.55c-18.61 0-30.52 9.683-30.52 28.294 0 18.61 12.28 27.547 30.9 29.04l61.42 5.214c46.54 4.091 77.06 25.318 77.06 75.198s-32.38 76.69-78.17 76.69h-139.23v-46.904h134.01c17.5 0 28.66-11.912 28.66-29.408z" ></path><path d="m1789.79 144.373c81.89 0 133.65 52.487 133.65 134.761 0 82.273-53.98 135.506-135.88 135.506s-133.65-53.233-133.65-135.506c0-82.274 53.98-134.761 135.88-134.761zm77.43 135.129c0-55.095-32.02-87.479-78.56-87.479-46.53 0-78.55 32.384-78.55 87.479 0 55.094 32.02 87.478 78.55 87.478 46.54 0 78.56-32.384 78.56-87.478z" ></path><path d="m2192.95 222.913c0 29.04-16.75 51.372-39.1 61.056v.746c23.46 3.354 35.37 20.103 35.74 42.814l1.12 82.641h-54.35l-1.12-73.705c-.36-16.381-10.05-26.432-29.4-26.432h-90.47v100.137h-54.35v-261.33h150.03c49.14 0 81.9 24.94 81.9 74.083zm-54.73 7.454c0-22.333-11.91-34.623-34.25-34.623h-88.6v69.236h89.34c20.47 0 33.51-12.281 33.51-34.623z" ></path></g></svg>Cursor</span></td><td><span class="feat"><span class="">now</span><span class="">assess</span><span class="">sessions</span><span class="yes">doctor</span><span class="plan">usage import planned</span></span></td></tr>
+          <tr><td><span class="prov"><svg aria-hidden="true" viewBox="0 0 112 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M37.7773 14.8781C37.7986 14.7928 37.8626 14.7715 37.9265 14.7715H39.8021C39.866 14.7715 39.9087 14.7928 39.9087 14.8781C39.9087 16.2851 38.2249 19.6748 33.7705 19.6748C29.0816 19.6748 27.0355 16.477 27.0355 11.9575C27.0355 7.43789 29.5078 4.24009 33.7705 4.24009C38.4167 4.24009 39.9087 7.86426 39.9087 9.03679C39.9087 9.12207 39.866 9.14339 39.8021 9.14339H37.9265C37.8626 9.14339 37.7986 9.10075 37.7773 9.03679C37.4576 8.12009 36.5838 6.05218 33.7705 6.05218C30.7866 6.05218 29.1668 8.26932 29.1668 11.9575C29.1668 15.6456 30.7866 17.8627 33.7705 17.8627C36.328 17.8627 37.4363 16.008 37.7773 14.8781Z" fill="currentColor"></path><path d="M51.1782 14.068C51.1782 17.3937 49.2174 19.6748 45.8925 19.6748C42.5463 19.6748 40.6068 17.3937 40.6068 14.068C40.6068 10.721 42.5463 8.46119 45.8925 8.46119C49.2174 8.46119 51.1782 10.7423 51.1782 14.068ZM49.1534 14.068C49.1534 11.8509 47.9386 10.2733 45.8925 10.2733C43.8677 10.2733 42.6316 11.8509 42.6316 14.068C42.6316 16.2852 43.8677 17.8627 45.8925 17.8627C47.9386 17.8627 49.1534 16.2852 49.1534 14.068Z" fill="currentColor"></path><path d="M54.468 20.7194C54.6386 21.2098 55.4058 22.0838 57.1748 22.0838C59.4127 22.0838 60.2013 20.5489 60.2013 19.0566V18.481C60.2013 18.3957 60.0734 18.3104 59.9882 18.4383C59.7537 18.7368 58.4323 19.6748 56.9404 19.6748C54.0418 19.6748 51.8678 17.3937 51.8678 14.068C51.8678 10.7423 53.8287 8.46119 56.9404 8.46119C58.006 8.46119 59.3914 9.05811 59.9882 9.65504C60.0521 9.71899 60.1587 9.76163 60.2013 9.63372L60.4144 8.78097C60.4357 8.71701 60.4571 8.67438 60.521 8.67438H62.1195C62.1834 8.67438 62.226 8.71701 62.226 8.78097V19.0566C62.226 21.9346 60.18 23.8959 57.1748 23.8959C54.5533 23.8959 52.5712 22.4249 52.4007 20.7194C52.4007 20.6555 52.4433 20.6128 52.5072 20.6128H54.3615C54.4254 20.6128 54.4467 20.6555 54.468 20.7194ZM53.8926 14.068C53.8926 16.2852 55.1074 17.8627 57.1535 17.8627C59.093 17.8627 60.2013 16.2852 60.2013 14.068C60.2013 11.8509 59.093 10.2733 57.1535 10.2733C55.1074 10.2733 53.8926 11.8509 53.8926 14.068Z" fill="currentColor"></path><path d="M64.42 8.67438H66.0185C66.0824 8.67438 66.1037 8.71701 66.125 8.78097L66.3382 9.74031C66.3595 9.86822 66.53 9.82558 66.5726 9.76163C66.9989 9.12207 67.9367 8.46119 69.3646 8.46119C72.4551 8.46119 74.0109 10.721 74.0109 13.4924V19.355C74.0109 19.419 73.9683 19.4616 73.9043 19.4616H72.0927C72.0288 19.4616 71.9862 19.419 71.9862 19.355V13.4924C71.9862 11.8722 71.2615 10.2733 69.1515 10.2733C67.3612 10.2733 66.3382 11.8295 66.3382 13.4924V19.355C66.3382 19.419 66.2955 19.4616 66.2316 19.4616H64.42C64.356 19.4616 64.3134 19.419 64.3134 19.355V8.78097C64.3134 8.71701 64.356 8.67438 64.42 8.67438Z" fill="currentColor"></path><path d="M78.1612 8.78097V19.355C78.1612 19.419 78.1185 19.4616 78.0546 19.4616H76.243C76.179 19.4616 76.1364 19.419 76.1364 19.355V8.78097C76.1364 8.71701 76.179 8.67438 76.243 8.67438H78.0546C78.1185 8.67438 78.1612 8.71701 78.1612 8.78097ZM78.2038 7.3313H76.0725C76.0085 7.3313 75.9659 7.28866 75.9659 7.22471V5.07152C75.9659 5.00756 76.0085 4.96492 76.0725 4.96492H78.2038C78.2677 4.96492 78.3103 5.00756 78.3103 5.07152V7.22471C78.3103 7.28866 78.2677 7.3313 78.2038 7.3313Z" fill="currentColor"></path><path d="M85.3472 17.7561V19.355C85.3472 19.419 85.3046 19.4616 85.2406 19.4616H83.5995C81.8305 19.4616 80.8075 18.6942 80.8075 16.946V10.3799C80.8075 10.3159 80.7649 10.2733 80.7009 10.2733H78.804C78.7401 10.2733 78.6975 10.2306 78.6975 10.1667V8.78097C78.6975 8.71701 78.7401 8.67438 78.804 8.67438H80.7009C80.7649 8.67438 80.8075 8.63174 80.8075 8.56778V5.68976C80.8075 5.6258 80.8501 5.58317 80.9141 5.58317H82.7257C82.7896 5.58317 82.8322 5.6258 82.8322 5.68976V8.56778C82.8322 8.63174 82.8749 8.67438 82.9388 8.67438H85.2406C85.3046 8.67438 85.3472 8.71701 85.3472 8.78097V10.1667C85.3472 10.2306 85.3046 10.2733 85.2406 10.2733H82.9388C82.8749 10.2733 82.8322 10.3159 82.8322 10.3799V16.5836C82.8322 17.2445 83.1306 17.6495 83.9831 17.6495H85.2406C85.3046 17.6495 85.3472 17.6922 85.3472 17.7561Z" fill="currentColor"></path><path d="M88.7362 8.78097V19.355C88.7362 19.419 88.6935 19.4616 88.6296 19.4616H86.818C86.754 19.4616 86.7114 19.419 86.7114 19.355V8.78097C86.7114 8.71701 86.754 8.67438 86.818 8.67438H88.6296C88.6935 8.67438 88.7362 8.71701 88.7362 8.78097ZM88.7788 7.3313H86.6475C86.5835 7.3313 86.5409 7.28866 86.5409 7.22471V5.07152C86.5409 5.00756 86.5835 4.96492 86.6475 4.96492H88.7788C88.8427 4.96492 88.8854 5.00756 88.8854 5.07152V7.22471C88.8854 7.28866 88.8427 7.3313 88.7788 7.3313Z" fill="currentColor"></path><path d="M100.803 14.068C100.803 17.3937 98.8421 19.6748 95.5172 19.6748C92.1711 19.6748 90.2316 17.3937 90.2316 14.068C90.2316 10.721 92.1711 8.46119 95.5172 8.46119C98.8421 8.46119 100.803 10.7423 100.803 14.068ZM98.7782 14.068C98.7782 11.8509 97.5633 10.2733 95.5172 10.2733C93.4925 10.2733 92.2563 11.8509 92.2563 14.068C92.2563 16.2852 93.4925 17.8627 95.5172 17.8627C97.5633 17.8627 98.7782 16.2852 98.7782 14.068Z" fill="currentColor"></path><path d="M102.409 8.67438H104.008C104.071 8.67438 104.093 8.71701 104.114 8.78097L104.327 9.74031C104.349 9.86822 104.519 9.82558 104.562 9.76163C104.988 9.12207 105.926 8.46119 107.354 8.46119C110.444 8.46119 112 10.721 112 13.4924V19.355C112 19.419 111.957 19.4616 111.893 19.4616H110.082C110.018 19.4616 109.975 19.419 109.975 19.355V13.4924C109.975 11.8722 109.251 10.2733 107.141 10.2733C105.35 10.2733 104.327 11.8295 104.327 13.4924V19.355C104.327 19.419 104.285 19.4616 104.221 19.4616H102.409C102.345 19.4616 102.302 19.419 102.302 19.355V8.78097C102.302 8.71701 102.345 8.67438 102.409 8.67438Z" fill="currentColor"></path><path d="M14.493 10.5887C14.9972 10.2989 15.6205 10.2989 16.1247 10.5887L17.4277 11.3413C17.4693 11.3646 17.5145 11.3829 17.5603 11.3956C17.5695 11.3991 17.5786 11.4013 17.5892 11.4027C17.6343 11.4133 17.6802 11.4189 17.7253 11.421H17.7323C17.738 11.421 17.7415 11.421 17.7472 11.4189C17.7888 11.4189 17.8304 11.4118 17.872 11.4027C17.879 11.4027 17.8868 11.4006 17.8938 11.397C17.9375 11.3843 17.9806 11.366 18.0207 11.3448C18.0243 11.3427 18.0299 11.3413 18.0334 11.3392L20.6382 9.83407C20.825 9.72687 20.9392 9.52797 20.9392 9.31215V6.30261C20.9392 6.08678 20.825 5.88718 20.6382 5.78068L18.0334 4.27556C17.8466 4.16835 17.6167 4.16835 17.4299 4.27556L14.8251 5.78068C14.8251 5.78068 14.8181 5.78632 14.8146 5.78774C14.7751 5.81101 14.7363 5.84063 14.7038 5.87308C14.6982 5.87872 14.6947 5.88366 14.689 5.8893C14.6601 5.92033 14.6347 5.95489 14.6115 5.99086C14.6079 5.99651 14.6044 6.00144 14.6009 6.0092C14.579 6.0494 14.5607 6.09102 14.548 6.13616C14.5445 6.14533 14.5424 6.15449 14.541 6.16507C14.5304 6.21021 14.5226 6.25747 14.5226 6.30684V7.81196C14.5226 8.39243 14.211 8.9341 13.7068 9.22398C13.2026 9.51386 12.5793 9.51386 12.0751 9.22398L10.7721 8.47142C10.7305 8.44815 10.6853 8.42981 10.6395 8.41711C10.6303 8.41359 10.6212 8.41147 10.6106 8.41006C10.5655 8.39948 10.5196 8.39384 10.4745 8.39172H10.4548C10.4111 8.39172 10.3695 8.39878 10.3279 8.40794C10.3208 8.40794 10.313 8.41006 10.3081 8.41147C10.263 8.42417 10.2214 8.44251 10.1791 8.46437C10.1755 8.46649 10.1699 8.4679 10.1664 8.47001L7.56165 9.97513C7.3748 10.0823 7.26057 10.2812 7.26057 10.4971V13.5066C7.26057 13.7224 7.3748 13.922 7.56165 14.0285L10.1664 15.5336C10.1664 15.5336 10.1755 15.5372 10.1791 15.5393C10.2207 15.5612 10.2623 15.5795 10.3081 15.5922C10.3152 15.5943 10.3229 15.5957 10.33 15.5978C10.3716 15.607 10.4132 15.6126 10.4548 15.614C10.4604 15.614 10.4639 15.6162 10.4696 15.6162H10.4766C10.5218 15.6162 10.5676 15.6091 10.6127 15.5978C10.6219 15.5957 10.6311 15.5922 10.6416 15.5908C10.6868 15.5781 10.7305 15.5597 10.7742 15.5365L12.0773 14.7839C12.5814 14.494 13.2048 14.494 13.7082 14.7839C14.2103 15.0738 14.524 15.6162 14.524 16.1966V17.7018C14.524 17.7504 14.5311 17.7977 14.5424 17.8428C14.5445 17.852 14.5459 17.8626 14.5494 17.8717C14.5621 17.9155 14.5804 17.9585 14.6016 17.9987C14.6051 18.0043 14.6087 18.0093 14.6129 18.017C14.6347 18.053 14.6601 18.0876 14.6912 18.1186C14.6968 18.1242 14.7003 18.1292 14.706 18.1348C14.7384 18.1673 14.7765 18.1948 14.8167 18.2202C14.8202 18.2223 14.8237 18.2258 14.8272 18.2272L17.432 19.7323C17.5243 19.7866 17.6294 19.8141 17.7331 19.8141C17.8367 19.8141 17.9418 19.7866 18.0341 19.7323L20.6389 18.2272C20.8257 18.12 20.94 17.9211 20.94 17.7053V14.6957C20.94 14.4799 20.8257 14.2803 20.6389 14.1738L18.0341 12.6687C18.0341 12.6687 18.025 12.6652 18.0215 12.6631C17.9798 12.6412 17.9382 12.6229 17.8931 12.6102C17.8861 12.6087 17.8804 12.6087 17.8734 12.6066C17.8318 12.596 17.7881 12.5904 17.7465 12.5904H17.7267C17.6816 12.5904 17.6365 12.5975 17.5906 12.6087C17.5815 12.6109 17.5723 12.6144 17.5638 12.6158C17.5187 12.6285 17.475 12.6468 17.4313 12.6701L16.1282 13.4227C15.6261 13.7125 15.0007 13.7125 14.4972 13.4227C13.9952 13.1328 13.6814 12.5904 13.6814 12.0099C13.6814 11.4295 13.9931 10.8878 14.4972 10.5972L14.4951 10.5902L14.493 10.5887Z" fill="currentColor"></path><path d="M0.30176 9.83689L2.90648 11.342C2.99886 11.3963 3.10392 11.4238 3.20757 11.4238C3.31123 11.4238 3.41629 11.3963 3.50866 11.342L6.11338 9.83689C6.11338 9.83689 6.12044 9.83125 6.12396 9.82984C6.16415 9.80657 6.20153 9.77694 6.23467 9.7445C6.24031 9.73886 6.24383 9.73392 6.24947 9.72828C6.27838 9.69725 6.30377 9.66268 6.32774 9.62671C6.33127 9.62107 6.33479 9.61613 6.33832 9.60837C6.36018 9.56817 6.37851 9.52656 6.3912 9.48142C6.39473 9.47225 6.39684 9.46308 6.39825 9.4525C6.40883 9.40736 6.41659 9.36011 6.41659 9.31144V7.80632C6.41659 7.22585 6.72825 6.68418 7.23242 6.3943C7.73658 6.10442 8.35991 6.10442 8.86407 6.3943L10.1671 7.14686C10.2087 7.17013 10.2539 7.18847 10.2997 7.20117C10.3089 7.20469 10.318 7.20681 10.3286 7.20822C10.3737 7.2188 10.4175 7.22444 10.4647 7.22656H10.4718C10.4774 7.22656 10.4809 7.22444 10.4866 7.22444C10.5282 7.22444 10.5698 7.21739 10.6114 7.20822C10.6184 7.20822 10.6262 7.20611 10.6332 7.20258C10.6784 7.18988 10.72 7.17155 10.7623 7.14968C10.7658 7.14827 10.7714 7.14616 10.775 7.14404L13.3797 5.63892C13.5665 5.53171 13.6808 5.33281 13.6808 5.11699V2.10745C13.6808 1.89163 13.5665 1.69203 13.3797 1.58553L10.775 0.0804048C10.5881 -0.0268016 10.3582 -0.0268016 10.1714 0.0804048L7.56664 1.58553C7.56664 1.58553 7.55959 1.59117 7.55607 1.59258C7.51658 1.61585 7.4785 1.64548 7.44536 1.67792C7.43972 1.68356 7.4362 1.6885 7.43056 1.69414C7.40165 1.72518 7.37626 1.75974 7.35229 1.79571C7.34876 1.80135 7.34523 1.80629 7.34171 1.81405C7.31985 1.85425 7.30152 1.89586 7.28883 1.941C7.2853 1.95017 7.28318 1.95934 7.28177 1.96992C7.27049 2.01506 7.26344 2.06231 7.26344 2.11168V3.61681C7.26344 4.19727 6.95178 4.73895 6.44761 5.02953C5.94557 5.31941 5.32012 5.31941 4.81596 5.02953L3.51289 4.27697C3.47129 4.2537 3.42616 4.23536 3.38033 4.22266C3.37116 4.21914 3.36199 4.21702 3.35142 4.21561C3.30629 4.20503 3.26046 4.19939 3.21533 4.19727H3.19559C3.15187 4.19727 3.11027 4.20433 3.06866 4.21349C3.06161 4.21349 3.05386 4.21561 3.04892 4.21702C3.00379 4.22972 2.96219 4.24805 2.91988 4.26992C2.91636 4.27203 2.91072 4.27345 2.90719 4.27556L0.302465 5.78068C0.115607 5.88789 0.00137719 6.08679 0.00137719 6.30261V9.31215C0.00137719 9.52797 0.115607 9.72757 0.302465 9.83407L0.30176 9.83689Z" fill="currentColor"></path><path d="M13.3762 18.3583L10.7715 16.8531C10.7715 16.8531 10.7623 16.8496 10.7588 16.8475C10.7172 16.8256 10.6756 16.808 10.6297 16.7953C10.6227 16.7932 10.6149 16.7918 10.6079 16.7897C10.5663 16.7805 10.5247 16.7734 10.481 16.7734H10.4612C10.4161 16.7734 10.3702 16.7805 10.3251 16.7918C10.316 16.7939 10.3068 16.7974 10.2976 16.7988C10.2525 16.8115 10.2088 16.8299 10.1651 16.8531L8.86199 17.6057C8.35994 17.8956 7.7345 17.8956 7.23245 17.6057C6.72829 17.3158 6.41662 16.7734 6.41662 16.193V14.6879C6.41662 14.6392 6.40957 14.5919 6.39829 14.5461C6.39688 14.5369 6.39476 14.5263 6.39124 14.5172C6.37855 14.4734 6.36021 14.4304 6.33835 14.3902C6.33483 14.3846 6.3313 14.3796 6.32778 14.3719C6.30592 14.3359 6.28053 14.3013 6.24951 14.2703C6.24387 14.2647 6.24034 14.2597 6.23541 14.2541C6.20297 14.2216 6.16489 14.1941 6.1247 14.1687C6.12117 14.1666 6.11765 14.1631 6.11412 14.1617L3.5094 12.6566C3.32254 12.5494 3.09267 12.5494 2.90581 12.6566L0.301088 14.1617C0.11423 14.2689 0 14.4678 0 14.6836V17.6932C0 17.909 0.11423 18.1086 0.301088 18.2151L2.90581 19.7202C2.90581 19.7202 2.91498 19.7237 2.9185 19.7258C2.96011 19.7477 3.00171 19.7653 3.04543 19.778C3.05248 19.7802 3.06023 19.7816 3.06729 19.7837C3.10889 19.7929 3.14908 19.7985 3.19209 19.7999C3.19773 19.7999 3.20267 19.8013 3.2069 19.8013H3.21395C3.25908 19.8013 3.30491 19.7943 3.34793 19.783C3.35709 19.7809 3.36767 19.7773 3.37684 19.7759C3.42196 19.7632 3.46568 19.7449 3.5094 19.7216L4.81247 18.9691C5.31663 18.6792 5.93996 18.6792 6.44412 18.9691C6.94617 19.2589 7.25995 19.8013 7.25995 20.3818V21.8869C7.25995 21.9356 7.267 21.9828 7.27828 22.0287C7.2804 22.0378 7.28181 22.0484 7.28533 22.0576C7.29802 22.1013 7.31636 22.1443 7.33822 22.1845C7.34174 22.1902 7.34527 22.1951 7.34879 22.2029C7.37065 22.2389 7.39604 22.2734 7.42706 22.3044C7.4327 22.3101 7.43623 22.315 7.44116 22.3207C7.4736 22.3531 7.51168 22.3806 7.55187 22.406C7.5554 22.4081 7.55892 22.4117 7.56315 22.4131L10.1679 23.9182C10.2602 23.9725 10.3653 24 10.469 24C10.5726 24 10.6777 23.9725 10.7701 23.9182L13.3748 22.4131C13.5616 22.3059 13.6759 22.107 13.6759 21.8911V18.8816C13.6759 18.6658 13.5616 18.4662 13.3748 18.3597L13.3762 18.3583Z" fill="currentColor"></path></svg>Devin</span></td><td><span class="feat"><span class="">now</span><span class="">assess</span><span class="">sessions</span><span class="yes">doctor</span><span class="plan">reader planned</span></span></td></tr>
+          <tr><td><span class="prov"><svg aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="900 950 5250 1150"><defs><style> .mtcls-1{fill:none;}.mtcls-2{fill:currentColor;} </style></defs><g><path d="M2821.4144,1032.1316H3009.49L3329.2876,1610.62l319.793-578.4879h184.0048V1982.696H3679.6382V1254.16l-280.4166,504.4785H3255.2782L2974.8616,1254.16v728.536H2821.4144Z"></path><path d="M4328.0428,1999.6744q-106.6049,0-187.3953-47.1892-80.8056-47.1891-125.95-130.7024-45.16-83.5176-45.1515-191.4708,0-109.31,44.1326-193.5086,44.1325-84.1809,122.5557-131.7256,78.4253-47.5143,180.2675-47.5273,101.1615,0,174.1586,47.8655,72.9753,47.8785,112.3669,134.1016,39.372,86.2359,39.3807,202.3359v42.09H4121.6357q14.262,86.9254,70.2765,136.8157,56.0144,49.9076,141.5631,49.9033,68.5727,0,118.1421-20.3689,49.5564-20.3688,93.0213-61.7829l81.4754,99.8065Q4504.5643,1999.683,4328.0428,1999.6744ZM4440.0759,1435.78q-48.2167-49.2181-126.2887-49.2269-76.0516,0-127.3076,50.25-51.2733,50.2458-64.8439,135.1161h373.4378Q4488.2774,1485.0071,4440.0759,1435.78Z"></path><path d="M4828.4631,1400.1412H4687.2337V1274.5289h141.2294V1066.7647h148.0146v207.7642h214.5538v125.6123H4976.4777v318.4359q0,79.4334,27.1585,113.3858,27.1455,33.9612,93.0213,33.9481,29.181,0,49.5651-2.3759,20.3688-2.3673,44.8089-6.4515v124.251a419.4353,419.4353,0,0,1-56.6929,12.2265,446.1821,446.1821,0,0,1-66.201,4.7519q-239.6854,0-239.6745-262.0812Z"></path><path d="M5962.3646,1982.696H5817.0641v-99.13q-38.7021,55.6827-98.4495,85.8891-59.7539,30.2022-135.7968,30.22-93.6954,0-166.0075-47.8742-72.3121-47.8656-113.7284-131.717-41.4205-83.8557-41.4184-191.809,0-108.6339,42.0991-192.1558,42.09-83.5046,116.4425-131.0406,74.3476-47.5143,170.7594-47.5273,72.65,0,130.3642,28.1817a257.7339,257.7339,0,0,1,95.7354,79.7759v-90.9792h145.3005ZM5814.35,1522.3544q-23.7767-60.43-75.0284-95.4015-51.2733-34.9628-118.48-34.9627-95.0676,0-151.4094,63.8207-56.3656,63.825-56.3547,172.4633,0,109.3235,54.3169,173.14,54.3105,63.8251,147.3383,63.8208,68.566,0,122.2132-35.31,53.6275-35.288,77.4043-95.0548Z"></path></g><g><path d="M2080,1000c-123.3911,0-219.8478,92.936-307.164,210.9931C1652.8473,1058.2153,1552.5,1000,1432.4138,1000,1187.5862,1000,1000,1318.6207,1000,1655.8621,1000,1866.8965,1102.0956,2000,1273.1035,2000c123.0805,0,211.6-58.0259,368.9655-333.1034,0,0,65.5973-115.8413,110.7249-195.6386q23.72,38.2978,49.9647,82.5351l73.7931,124.1379C2020.2989,1918.4789,2100.39,2000,2245.5172,2000c166.5959,0,259.31-134.9233,259.31-350.3448C2504.8276,1296.5517,2313.0118,1000,2080,1000ZM1522.069,1592.4138c-127.5862,200-171.7242,244.8276-242.7587,244.8276-73.1034,0-116.5517-64.1784-116.5517-178.6207,0-244.8276,122.069-495.1724,267.5862-495.1724,78.8013,0,144.6539,45.51,245.5224,189.9131C1580.088,1500.2723,1522.069,1592.4138,1522.069,1592.4138Zm481.5283-25.178-88.23-147.1481q-35.8152-58.2482-68.8384-107.23c79.52-122.7353,145.1135-183.8919,223.1261-183.8919,162.0691,0,291.7243,238.6207,291.7243,531.7241,0,111.7242-36.5935,176.5518-112.4139,176.5518C2176.2949,1837.2414,2141.5787,1789.2474,2003.5973,1567.2358Z"></path></g></svg>Muse Code</span></td><td><span class="feat"><span class="">now</span><span class="">assess</span><span class="">sessions</span><span class="yes">doctor</span><span class="plan">reader planned</span></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+    <div class="section-head">
+      <h2>Frequently asked questions</h2>
+    </div>
+
+    <div class="faq-list">
+      <details open>
+        <summary><span class="q-prompt">$</span> what is decadra<span class="plus" aria-hidden="true"></span></summary>
+        <div class="faq-a">
+          A command line tool that answers one question per AI coding provider: does the plan
+          you pay for fit the usage you actually put through it. It reads the session logs on
+          your machine and reports each provider on its own.
+        </div>
+      </details>
+      <details>
+        <summary><span class="q-prompt">$</span> does it send anything over the network<span class="plus" aria-hidden="true"></span></summary>
+        <div class="faq-a">
+          No. Every read is local, and ccusage, which Decadra bundles for token and cost math,
+          always runs with <code>--offline</code>. There is no opt-in price refresh yet either.
+          Decadra makes zero network calls today.
+        </div>
+      </details>
+      <details>
+        <summary><span class="q-prompt">$</span> which providers work today<span class="plus" aria-hidden="true"></span></summary>
+        <div class="faq-a">
+          <code>now</code>, <code>assess</code>,
+          <code>sessions</code>, <code>alerts</code>,
+          <code>baseline</code>, and <code>doctor</code>
+          work for Claude Code and Codex. Cursor, Devin, and Muse Code adapters exist and their
+          doctor check confirms whether the local files are there, but reading usage from them
+          (a Cursor CSV import, manual entry for Devin, a native Muse reader) is planned, not
+          built yet.
+        </div>
+      </details>
+      <details>
+        <summary><span class="q-prompt">$</span> how is this different from ccusage<span class="plus" aria-hidden="true"></span></summary>
+        <div class="faq-a">
+          Decadra uses ccusage under the hood for token and cost math, always offline. ccusage
+          does not price your usage against every plan you could hold, add a per-session effort
+          read, or give you a one-block readout you can run from inside an agent's shell. That
+          plan-fit layer, and <code>decadra now</code>, are what
+          Decadra adds on top.
+        </div>
+      </details>
+      <details>
+        <summary><span class="q-prompt">$</span> why won't it tell me the cheapest provider<span class="plus" aria-hidden="true"></span></summary>
+        <div class="faq-a">
+          Token counts measure consumption, not output, and the units differ between vendors.
+          Decadra reports each provider on its own, alphabetically, and never adds or ranks
+          usage across them. The one number that spans providers is the bill line: the
+          subscription prices you recorded yourself, because that is money paid, not usage.
+        </div>
+      </details>
+      <details>
+        <summary><span class="q-prompt">$</span> what does now do inside an agent<span class="plus" aria-hidden="true"></span></summary>
+        <div class="faq-a">
+          Run it from the <code>!</code> shell in Claude Code or
+          Codex and it prints one block for the session you are in: this session so far, today,
+          month to date against your plan, pace to month end, ceiling evidence, and the last
+          plan-fit verdict. It exits 0 on every readout, including empty ones, because the agent reads the output too.
+        </div>
+      </details>
+      <details>
+        <summary><span class="q-prompt">$</span> is this affiliated with anthropic, openai, or cursor<span class="plus" aria-hidden="true"></span></summary>
+        <div class="faq-a">
+          No. Decadra is an independent project that reads local log files those
+          tools already write. It is not endorsed by or affiliated with any of them.
+        </div>
+      </details>
+    </div>
+  </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <svg class="footer-mark" viewBox="0 0 155 157" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <path d="M150.636 50.9933C152.325 50.8542 153.3 50.9543 153.826 52.8112C154.273 54.3911 154.435 55.8893 154.627 57.5095C155.701 66.5963 153.19 75.6072 153.809 84.6723C154.11 89.0705 154.455 93.3981 154.491 97.8139C154.57 107.069 152.933 116.298 153.487 125.542C153.579 127.07 153.689 128.602 153.702 130.133C153.672 132.71 153.31 135.248 153.143 137.822C152.874 141.979 153.452 146.029 152.498 150.13C151.79 153.171 149.396 155.673 146.084 155.503C145.24 155.46 144.795 155.014 144.165 154.515C142.923 153.348 141.723 151.977 140.571 150.72C138.262 148.199 135.973 145.66 133.703 143.105C126.248 134.737 118.885 126.287 111.616 117.757C107.07 112.593 102.57 107.237 98.0554 102.029C90.9596 93.8838 83.7971 85.7979 76.5678 77.7708L71.5607 72.2715C70.5725 71.2011 69.5618 70.1277 68.6398 69.0516C67.7813 68.0497 68.1079 66.4104 69.3517 66.0823C70.9231 65.6678 72.7508 65.3433 74.3422 65.0167L84.1739 62.9307C94.0694 60.7783 104.01 58.8387 113.99 57.1136C117.911 56.4376 121.882 55.8963 125.813 55.2358C134.109 53.8414 142.285 52.0419 150.636 50.9933Z" fill="currentColor"></path>
+    <path d="M57.3498 76.0909C58.4672 76.0338 58.7396 76.2885 59.4852 77.0679C60.6327 78.2675 61.7293 79.5285 62.8337 80.7678L69.9731 88.8724L91.5062 113.324L113.23 138.499L122.564 149.097C123.538 150.213 124.564 151.297 125.517 152.422C125.92 152.935 126.221 153.224 126.243 153.893C126.281 155.025 125.314 155.448 124.239 155.522C122.391 155.647 120.407 155.494 118.525 155.396L112.056 155.105C108.355 154.997 104.814 154.904 101.109 155.104C92.8016 155.55 84.5184 156.658 76.1881 156.513C74.9595 156.492 73.7302 156.425 72.502 156.396L60.0328 156.089C57.2958 156.041 54.5594 155.969 51.8237 155.874C50.0891 155.818 48.371 155.818 46.6743 155.515C44.2996 155.09 44.116 153.341 44.4258 151.303C45.3826 145.01 46.4758 138.714 47.5766 132.448C49.0501 124.139 50.4364 115.815 51.7354 107.477L54.8078 86.7989L55.6316 81.1908C55.8138 79.9416 55.9714 78.6276 56.2876 77.4092C56.4651 76.725 56.7494 76.4225 57.3498 76.0909Z" fill="currentColor"></path>
+    <path d="M75.7916 3.68191C78.34 3.51842 81.5165 3.67278 84.0571 3.94441C102.739 5.94244 121.429 8.89949 140.272 8.65191C144.047 8.57606 147.676 8.49235 150.367 11.6067C153.588 15.336 152.37 20.6767 152.732 25.2614C152.874 26.9781 153.083 28.6888 153.359 30.3892C153.557 31.6671 153.811 32.9314 153.874 34.2271C153.967 35.8156 153.488 36.7199 151.914 37.1829C145.151 39.1726 138.111 40.4131 131.2 41.6879C116.391 44.5428 101.566 47.3091 86.7243 49.9868C82.2201 50.7633 77.7081 51.4953 73.1901 52.1828C71.0936 52.4945 68.9854 52.8348 66.8717 53.0434C65.8776 53.1415 64.4293 53.1614 64.2426 51.856C64.1367 51.1157 64.3181 49.867 64.4538 49.1289C64.9541 46.4082 65.5087 43.694 66.0434 40.9791C66.902 36.6668 67.7206 32.3468 68.4993 28.0194C69.62 21.8683 70.57 15.6742 71.7436 9.53823C71.9807 8.29894 72.5117 6.09248 73.1805 5.09596C73.8422 4.11015 74.7033 3.87248 75.7916 3.68191Z" fill="currentColor"></path>
+    <path d="M56.3321 0.064804C59.1812 -0.316923 61.5675 0.980261 61.1071 4.15556C60.7016 6.95326 59.814 9.69423 59.0959 12.4286L55.4041 26.5034L50.9081 43.5532C50.1018 46.6788 49.3305 49.8112 48.5382 52.9404C48.2579 54.0472 47.683 55.2444 46.4899 55.5904C45.1553 55.9775 43.763 56.2647 42.4062 56.5727L34.6522 58.3369C24.8429 60.6148 14.2181 63.0331 4.3823 64.9265C2.73244 65.1678 0.713898 65.5919 0.50861 63.3424C0.369657 61.8195 0.482801 60.3793 0.563366 58.8571C0.733033 55.9524 0.963835 53.0515 1.25587 50.1566C1.42544 48.3754 1.5905 46.6945 1.7059 44.9085C1.97654 40.7177 1.08493 36.5929 0.944602 32.4871C0.790832 27.9861 1.45773 23.0586 1.70286 18.5264C1.85928 16.4022 1.72984 14.1948 2.01334 12.0941C2.43942 8.93843 5.53318 6.35515 8.59347 5.79188C11.0079 5.34745 14.3501 5.63605 16.9748 5.65254C19.6253 5.67187 22.2743 5.52262 24.9059 5.20565C31.8374 4.35104 38.7416 3.28613 45.6085 2.01249C48.74 1.44579 53.3567 0.406297 56.3321 0.064804Z" fill="currentColor"></path>
+    <path d="M41.0718 69.6369C41.8866 69.4975 43.0372 69.4297 43.7528 69.893C44.2577 70.2199 44.5057 70.7708 44.5983 71.3485C44.9409 73.4848 42.8923 81.1809 42.3648 83.488C41.5708 86.9196 40.7953 90.3551 40.0382 93.7946C36.1424 111.831 33.4185 130.044 29.9412 148.165C29.234 153.541 21.9808 154.229 17.5465 154.998C13.7643 155.654 8.17914 156.205 4.87019 153.744C2.67786 151.467 2.26385 146.559 1.70833 143.474C1.17519 140.513 1.25546 136.692 1.24594 133.655C1.20188 129.511 1.28804 125.367 1.50422 121.228C1.66751 118.076 1.93423 114.742 1.8674 111.598C1.74071 105.638 1.08579 99.6687 0.618495 93.7289C0.358744 90.4287 -0.0428053 87.1237 0.0037085 83.8089C0.0461008 80.8856 0.124901 76.9285 3.71441 76.1791C5.32257 75.8434 6.94937 75.8017 8.58246 75.6657C10.6273 75.482 12.6635 75.2124 14.6858 74.8575C20.8763 73.7108 27.1254 72.1935 33.3263 71.0344C35.9442 70.5451 38.4153 69.9999 41.0718 69.6369Z" fill="currentColor"></path>
+  </svg>
+  <div class="statusbar">
+    <span class="quote">©2026 Decadra</span>
+    <div class="links">
+      <a href="https://github.com/decadra/cli" target="_blank" rel="noopener">github</a>
+      <a href="https://github.com/decadra/cli/issues" target="_blank" rel="noopener">issues</a>
+      <a href="https://github.com/decadra/cli/blob/main/LICENSE" target="_blank" rel="noopener">license</a>
+      <span class="clock" id="clock" aria-hidden="true"></span>
+      <span>v0.4.0</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    try{
+      var el = document.getElementById('clock');
+      function tick(){
+        var d = new Date();
+        var h = String(d.getHours()).padStart(2,'0');
+        var m = String(d.getMinutes()).padStart(2,'0');
+        el.textContent = h + ':' + m;
+      }
+      tick();
+      setInterval(tick, 30000);
+    }catch(e){}
+  })();
+
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var text = btn.getAttribute('data-copy');
+      try{
+        navigator.clipboard.writeText(text).then(function(){
+          btn.textContent = 'copied';
+          btn.setAttribute('data-copied','true');
+          setTimeout(function(){
+            btn.textContent = 'copy';
+            btn.removeAttribute('data-copied');
+          }, 1500);
+        }).catch(function(){});
+      }catch(e){}
+    });
+  });
+</script>
+</body>
+</html>

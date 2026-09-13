@@ -1,0 +1,37 @@
+{
+  "sessions": [
+    {
+      "cacheCreationTokens": 343372,
+      "cacheReadTokens": 9657910,
+      "firstActivity": "2026-09-05T19:32:59.797Z",
+      "inputTokens": 1458,
+      "lastActivity": "2026-09-05T20:22:52.747Z",
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 343372,
+          "cacheReadTokens": 9657910,
+          "cost": 0.0,
+          "inputTokens": 1458,
+          "modelName": "claude-fable-5-1",
+          "outputTokens": 171346
+        }
+      ],
+      "modelsUsed": [
+        "claude-fable-5-1"
+      ],
+      "outputTokens": 171346,
+      "projectPath": "-home-user-decadra",
+      "sessionId": "2f44129c-0000-4000-8000-000000000001",
+      "totalCost": 0.0,
+      "totalTokens": 10174086
+    }
+  ],
+  "totals": {
+    "cacheCreationTokens": 343372,
+    "cacheReadTokens": 9657910,
+    "inputTokens": 1458,
+    "outputTokens": 171346,
+    "totalCost": 0.0,
+    "totalTokens": 10174086
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "blocks": [
+    {
+      "actualEndTime": "2026-09-05T20:22:52.747Z",
+      "burnRate": {
+        "costPerHour": 0.0,
+        "tokensPerMinute": 203961.02841677942,
+        "tokensPerMinuteForIndicator": 3464.220919160026
+      },
+      "costUSD": 0,
+      "endTime": "2026-09-06T00:00:00.000Z",
+      "entries": 53,
+      "id": "2026-09-05T19:00:00.000Z",
+      "isActive": true,
+      "isGap": false,
+      "models": [
+        "claude-fable-5-1"
+      ],
+      "projection": {
+        "remainingMinutes": 216,
+        "totalCost": 0.0,
+        "totalTokens": 54229668
+      },
+      "startTime": "2026-09-05T19:00:00.000Z",
+      "tokenCounts": {
+        "cacheCreationInputTokens": 343372,
+        "cacheReadInputTokens": 9657910,
+        "inputTokens": 1458,
+        "outputTokens": 171346
+      },
+      "totalTokens": 10174086
+    }
+  ]
+}

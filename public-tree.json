@@ -1,0 +1,20 @@
+{
+  "//": "Paths kept out of the public release mirror. Prefixes match whole path segments.",
+  "exclude": [
+    "src/routing/",
+    "src/analysis/routing.ts",
+    "src/store/routing.ts",
+    "src/commands/route.ts",
+    "src/commands/route.schema.ts",
+    "src/git/repository.ts",
+    "test/routing-command.test.ts",
+    "test/routing-invariants.test.ts",
+    "test/routing-policy.test.ts",
+    "test/routing-repository.test.ts",
+    "test/routing-schema.test.ts",
+    "docs/routing.md",
+    "docs/decisions/0009-shadow-executor-eligibility.md",
+    "docs/plans/2026-09-12-routing-shadow.md",
+    "docs/testing/2026-09-12-routing-verification.md"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "monthly": [
+    {
+      "cacheCreationTokens": 343372,
+      "cacheReadTokens": 9657910,
+      "inputTokens": 1458,
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 343372,
+          "cacheReadTokens": 9657910,
+          "cost": 0.0,
+          "inputTokens": 1458,
+          "modelName": "claude-fable-5-1",
+          "outputTokens": 171346
+        }
+      ],
+      "modelsUsed": [
+        "claude-fable-5-1"
+      ],
+      "month": "2026-09",
+      "outputTokens": 171346,
+      "totalCost": 0.0,
+      "totalTokens": 10174086
+    }
+  ],
+  "totals": {
+    "cacheCreationTokens": 343372,
+    "cacheReadTokens": 9657910,
+    "inputTokens": 1458,
+    "outputTokens": 171346,
+    "totalCost": 0.0,
+    "totalTokens": 10174086
+  }
+}

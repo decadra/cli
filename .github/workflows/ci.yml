@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: quiet alerts stay quiet without opening SQLite
+        run: node -e "const {spawnSync}=require('node:child_process'); const r=spawnSync(process.execPath,['dist/cli.js','alerts','check'],{encoding:'utf8'}); if(r.status!==0 || r.stdout || r.stderr) throw new Error(JSON.stringify(r));"
+        env:
+          DECADRA_HOME: ${{ runner.temp }}/decadra-quiet-home
+      - run: node dist/cli.js doctor --json
+        env:
+          DECADRA_HOME: ${{ runner.temp }}/decadra-home
+
+      # What `npm install decadra` actually hands someone. Catches a files array that forgot
+      # schema/, and a bin pointing at a dist the tarball does not carry.
+      # Linux only: this checks packaging, not platform behaviour, and the script is bash.
+      - name: the packed tarball runs on its own
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          npm pack
+          mkdir -p "$RUNNER_TEMP/packed"
+          tar xf decadra-*.tgz -C "$RUNNER_TEMP/packed"
+          cd "$RUNNER_TEMP/packed/package"
+          test -f schema/plans.schema.json
+          npm install --omit=dev --ignore-scripts
+          node dist/cli.js doctor --json
+        env:
+          DECADRA_HOME: ${{ runner.temp }}/decadra-packed-home

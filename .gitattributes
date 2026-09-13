@@ -1,0 +1,11 @@
+# Line endings are LF in the repository and LF in the working tree on every platform.
+# Not a style preference: the fixtures are line-oriented transcripts, readers count and split
+# on lines, and a reader budget is asserted in lines. A CRLF checkout changes all three.
+* text=auto eol=lf
+
+# Stated outright for the file types where it matters, so the intent survives an edit above.
+*.jsonl text eol=lf
+*.json  text eol=lf
+*.ts    text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf

@@ -1,0 +1,37 @@
+{
+  "sessions": [
+    {
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 97280,
+      "costUSD": 0.25780000000000003,
+      "directory": "2026/09/05",
+      "inputTokens": 23310,
+      "lastActivity": "2026-09-05T21:12:49.261Z",
+      "models": {
+        "gpt-5.6-sol": {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 97280,
+          "inputTokens": 23310,
+          "isFallback": false,
+          "outputTokens": 3087,
+          "reasoningOutputTokens": 362,
+          "totalTokens": 123677
+        }
+      },
+      "outputTokens": 3087,
+      "reasoningOutputTokens": 362,
+      "sessionFile": "rollout-2026-09-05T16-07-24-01a07365-0000-7000-8000-000000000001",
+      "sessionId": "2026/09/05/rollout-2026-09-05T16-07-24-01a07365-0000-7000-8000-000000000001",
+      "totalTokens": 123677
+    }
+  ],
+  "totals": {
+    "cacheCreationTokens": 0,
+    "cacheReadTokens": 97280,
+    "costUSD": 0.25780000000000003,
+    "inputTokens": 23310,
+    "outputTokens": 3087,
+    "reasoningOutputTokens": 362,
+    "totalTokens": 123677
+  }
+}

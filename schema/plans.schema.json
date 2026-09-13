@@ -1,0 +1,382 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "number",
+      "const": 2
+    },
+    "asOf": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "currency": {
+      "type": "string",
+      "const": "USD"
+    },
+    "//": {
+      "type": "string"
+    },
+    "providers": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "//": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "meter": {
+            "type": "string",
+            "enum": [
+              "usd-list",
+              "usd-billed",
+              "acu"
+            ]
+          },
+          "ingest": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "ccusage"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "native"
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "import"
+                  },
+                  "format": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "format"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "manual"
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "basePlan": {
+            "type": "string"
+          },
+          "windows": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "short",
+                    "weekly"
+                  ]
+                },
+                "hours": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "effectiveFrom": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "effectiveTo": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              },
+              "required": [
+                "kind",
+                "hours",
+                "effectiveFrom"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "anchorApiEquivalentUsd": {
+            "type": "object",
+            "properties": {
+              "short": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "weekly": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "short",
+              "weekly"
+            ],
+            "additionalProperties": false
+          },
+          "plans": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "monthlyUsd": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "allowance": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "capped-window"
+                        },
+                        "multiplierVsBase": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "multiplierVsBase"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "included-credit"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "enum": [
+                            "usd-list",
+                            "usd-billed",
+                            "acu"
+                          ]
+                        },
+                        "amount": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "overageUsdPerUnit": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "unit",
+                        "amount",
+                        "overageUsdPerUnit"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "metered"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "enum": [
+                            "usd-list",
+                            "usd-billed",
+                            "acu"
+                          ]
+                        },
+                        "usdPerUnit": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "minimumUsd": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "tokenPricing": {
+                          "type": "object",
+                          "properties": {
+                            "input": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "output": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "cacheWrite": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "cacheRead": {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          },
+                          "required": [
+                            "input",
+                            "output"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "unit"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "asOf": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "monthlyUsd",
+                "allowance",
+                "asOf"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "displayName",
+          "meter",
+          "windows",
+          "plans"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "modelPricing": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "output": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cacheWrite": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cacheRead": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "input",
+          "output",
+          "cacheWrite",
+          "cacheRead"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "asOf",
+    "currency",
+    "providers",
+    "modelPricing"
+  ],
+  "additionalProperties": false
+}
