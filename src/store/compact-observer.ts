@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { closeSync, constants, fchmodSync, fstatSync, mkdirSync, openSync, realpathSync, statSync } from 'node:fs';
+import { closeSync, constants, fchmodSync, fstatSync, mkdirSync, lstatSync, openSync, realpathSync, statSync } from 'node:fs';
 import { dirname, join, basename, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { createRequire } from 'node:module';
@@ -31,17 +31,27 @@ function trustedRoot(path: string) {
     const info = statSync(home, { bigint: true, throwIfNoEntry: false });
     return info ? [info.dev + '/' + info.ino] : [];
   }));
+  const ancestors: string[] = [];
   for (let dir = root; ; dir = dirname(dir)) {
-    try {
-      const info = statSync(dir);
-      const identity = statSync(dir, { bigint: true });
-      if (providerIds.has(identity.dev + '/' + identity.ino)) return false;
-      if (!info.isDirectory()) return false;
-      if (process.getuid && (info.uid !== process.getuid() && info.uid !== 0 ||
-          ((info.mode & 0o022) !== 0 && !(dir !== root && info.uid === 0 && (info.mode & 0o1000))))) return false;
-    } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-    if (dir === dirname(dir)) return root;
+    ancestors.push(dir);
+    if (dir === dirname(dir)) break;
   }
+  for (const dir of ancestors.reverse()) {
+    let info = lstatSync(dir, { bigint: true, throwIfNoEntry: false });
+    if (!info) {
+      try { mkdirSync(dir, { mode: 0o700 }); }
+      catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
+      info = lstatSync(dir, { bigint: true });
+    }
+    if (!info.isDirectory() || providerIds.has(info.dev + '/' + info.ino)) return false;
+    if (process.getuid) {
+      const owner = info.uid === BigInt(process.getuid());
+      const system = info.uid === 0n;
+      const stickyParent = system && dir !== root && (info.mode & 0o1000n) !== 0n;
+      if ((!owner && !system) || ((info.mode & 0o022n) !== 0n && !stickyParent)) return false;
+    }
+  }
+  return root;
 }
 
 export async function observeCompact(root: string) {
@@ -59,8 +69,6 @@ export async function observeCompact(root: string) {
     const label = phase.safeParse(process.env.DECADRA_PHASE);
     const destination = trustedRoot(root);
     if (!destination) return;
-    mkdirSync(destination, { recursive: true, mode: 0o700 });
-    if (trustedRoot(destination) !== destination) return;
     const path = join(destination, 'compact.sqlite');
     const fd = openSync(path, constants.O_CREAT | constants.O_RDWR | constants.O_NOFOLLOW | constants.O_NONBLOCK, 0o600);
     try {
