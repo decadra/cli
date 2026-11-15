@@ -1,5 +1,7 @@
 import { readFile, realpath, stat } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { fromMarkdown } from 'mdast-util-from-markdown';
+import type { Nodes } from 'mdast';
 import { execa } from 'execa';
 import { homedir } from 'node:os';
 import { discoveryEnv } from './session-scope';
@@ -41,6 +43,11 @@ async function codexFile(directory: string, fallbacks: string[] = []) {
   return null;
 }
 
+function* textNodes(node: Nodes): Generator<string> {
+  if (node.type === 'text') yield node.value;
+  if ('children' in node) for (const child of node.children) yield* textNodes(child);
+}
+
 export async function checkHarness(cwd: string) {
   const directories = await repositoryDirectories(cwd);
   const root = directories[0]!;
@@ -67,29 +74,22 @@ export async function checkHarness(cwd: string) {
     }
     layers.push({ directory, codex, claude });
   }
-  const visited = new Set<string>();
+  const visited = new Map<string, number>();
   const missing: string[] = [];
   async function walk(file: string, depth: number): Promise<void> {
     if (depth > 5) return;
-    if (visited.size >= 64 || !within(root, file)) { unknown = true; return; }
+    if (!within(root, file)) { unknown = true; return; }
     try {
       const path = await realpath(file);
       if (!within(root, path)) { unknown = true; return; }
-      if (visited.has(path)) return;
-      visited.add(path);
+      const previous = visited.get(path);
+      if (previous !== undefined && previous <= depth) return;
+      if (previous === undefined && visited.size >= 64) { unknown = true; return; }
+      visited.set(path, depth);
       const info = await stat(path);
       if (!info.isFile() || info.size > 262144) { unknown = true; return; }
-      const lines = (await readFile(path, 'utf8')).split(/\r?\n/);
-      let fence = '';
-      const paragraphs: string[] = [];
-      for (const line of lines) {
-        const marker = /^\s*(`{3,}|~{3,})/.exec(line)?.[1];
-        if (marker && (!fence || marker.startsWith(fence))) { fence = fence ? '' : marker; continue; }
-        if (fence || /^(?: {4}|\t)/.test(line)) continue;
-        paragraphs.push(line);
-      }
-      for (const paragraph of paragraphs.join('\n').split(/\n\s*\n/)) {
-        const prose = paragraph.replace(/(`+)[\s\S]*?\1/g, ' ');
+      const document = fromMarkdown(await readFile(path, 'utf8'));
+      for (const prose of textNodes(document)) {
         for (const match of prose.matchAll(/(?:^|\s)@([^\s`]+)/g)) {
           const ref = match[1]!.replace(/[.,;:!?]+$/, '');
           if (!ref.startsWith('~') && !isAbsolute(ref)) await walk(resolve(dirname(path), ref), depth + 1);

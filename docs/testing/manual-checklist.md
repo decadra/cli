@@ -38,4 +38,3 @@ For a person, or a local Claude Code session driving a real terminal. Run from t
 
 - [ ] `alerts check` with fewer than two months of verdicts: prints nothing, exit 0.
 - [ ] `alerts schedule --weekly --print`: the entry references the right node and cli path for this machine.
-

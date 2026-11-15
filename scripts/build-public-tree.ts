@@ -67,7 +67,10 @@ edit('src/config/settings.ts', (s) =>
 );
 
 // The public package ships only the command line entry.
-edit('docs/testing/manual-checklist.md', s => s.replace(/\n## Shadow routing\b[\s\S]*?(?=\n## |$)/, '\n'));
+edit('docs/testing/manual-checklist.md', s => s.replace(/\n## Shadow routing\b[\s\S]*?(?=\n## |$)/, '').trimEnd() + '\n');
+edit('docs/testing/scenarios.md', s => s.replace(/^## R(?!3 )[^\n]*\n[\s\S]*?(?=^## )/gm, ''));
+edit('docs/architecture/data-files.md', s => s.split('\n').filter(line =>
+  !line.startsWith('| `routing-events.jsonl`') && !line.startsWith('Optional `settings.json` routing pools')).join('\n').trimEnd() + '\n');
 edit('docs/architecture/overview.md', s => s.replace('; index.ts is the module entry, routing core only', '').split('\n').filter(l => !l.startsWith('- `routing/schema.ts`')).join('\n'));
 edit('README.md', s => s.replace(/The package also exports a programmatic routing core[^.]*\(.*?\); the command line is built on it\. /, ''));
 edit('docs/architecture/commands.md', s => s.split('\n').filter(line =>

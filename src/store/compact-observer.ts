@@ -27,9 +27,15 @@ function trustedRoot(path: string) {
   const comparable = (p: string) => p.normalize('NFC').toLowerCase();
   const destination = comparable(root);
   if (homes.map(p => comparable(canonical(p))).some(p => destination === p || destination.startsWith(p + sep))) return false;
+  const providerIds = new Set(homes.flatMap(home => {
+    const info = statSync(home, { bigint: true, throwIfNoEntry: false });
+    return info ? [info.dev + '/' + info.ino] : [];
+  }));
   for (let dir = root; ; dir = dirname(dir)) {
     try {
       const info = statSync(dir);
+      const identity = statSync(dir, { bigint: true });
+      if (providerIds.has(identity.dev + '/' + identity.ino)) return false;
       if (!info.isDirectory()) return false;
       if (process.getuid && (info.uid !== process.getuid() && info.uid !== 0 ||
           ((info.mode & 0o022) !== 0 && !(dir !== root && info.uid === 0 && (info.mode & 0o1000))))) return false;
@@ -54,6 +60,7 @@ export async function observeCompact(root: string) {
     const destination = trustedRoot(root);
     if (!destination) return;
     mkdirSync(destination, { recursive: true, mode: 0o700 });
+    if (trustedRoot(destination) !== destination) return;
     const path = join(destination, 'compact.sqlite');
     const fd = openSync(path, constants.O_CREAT | constants.O_RDWR | constants.O_NOFOLLOW | constants.O_NONBLOCK, 0o600);
     try {
