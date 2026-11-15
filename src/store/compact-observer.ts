@@ -2,10 +2,10 @@ import { createHash } from 'node:crypto';
 import { closeSync, constants, fchmodSync, fstatSync, mkdirSync, openSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { z } from 'zod';
+import * as z from 'zod/mini';
 
 const input = z.object({
-  session_id: z.string().min(1).max(256),
+  session_id: z.string().check(z.minLength(1), z.maxLength(256)),
   hook_event_name: z.enum(['PreCompact', 'PostCompact']),
 });
 const phase = z.enum(['implementation', 'verification', 'handoff']);

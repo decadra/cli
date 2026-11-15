@@ -35,6 +35,11 @@ excluded from this view.
 
 ### Optional local compaction pilot
 
+Leave the observer disabled for everyday work during the pilot. On one arm64
+Mac, 100 launches of the packed executable took 165 ms at the 95th percentile.
+The pilot budget is 100 ms including process startup. Use the disposable
+setup below to verify delivery and timing on your own machine.
+
 To try the observer, install this version of the package so that
 `decadra-observe` is on the host's PATH. Add these two entries to the
 existing `hooks` object in a disposable project's Claude Code settings:
