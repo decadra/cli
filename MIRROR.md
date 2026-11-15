@@ -70,7 +70,9 @@ reference the modules listed above, plus the build not emitting source maps.
 - `.github/workflows/ci.yml`
 - `README.md`
 - `docs/architecture/commands.md`
+- `docs/architecture/overview.md`
 - `docs/testing/README.md`
+- `docs/testing/manual-checklist.md`
 - `package.json`
 - `src/cli.ts`
 - `src/config/settings.ts`

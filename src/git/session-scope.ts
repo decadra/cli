@@ -1,4 +1,5 @@
 import { realpath } from 'node:fs/promises';
+import { isAbsolute } from 'node:path';
 import { execa } from 'execa';
 import type { SessionRecord } from '../ingest/types';
 
@@ -24,7 +25,7 @@ export async function sessionRepository(cwd: string) {
 export async function repositorySessions<T extends Pick<SessionRecord, 'cwd'>>(records: T[], target: string) {
   const directories = new Map<string, boolean>();
   for (const record of records) {
-    if (record.cwd && !directories.has(record.cwd)) {
+    if (record.cwd && isAbsolute(record.cwd) && !directories.has(record.cwd)) {
       directories.set(record.cwd, await commonDirectory(record.cwd) === target);
     }
   }

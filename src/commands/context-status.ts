@@ -7,7 +7,7 @@ import { z } from 'zod';
 import type { CommandContext } from './context';
 
 const settings = z.object({
-  model_auto_compact_token_limit: z.number().int().positive().optional(),
+  model_auto_compact_token_limit: z.union([z.number().int().positive(), z.bigint().positive().transform(String)]).optional(),
   model_auto_compact_token_limit_scope: z.string().optional(),
 });
 

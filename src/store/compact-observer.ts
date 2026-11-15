@@ -22,8 +22,11 @@ function canonical(path: string): string {
 function trustedRoot(path: string) {
   const root = canonical(resolve(path));
   const homes = ['.claude', '.codex', '.cursor', '.local/share/devin', '.local/share/muse'].map(p => join(homedir(), p));
-  for (const extra of [process.env.CODEX_HOME, process.env.CLAUDE_CONFIG_DIR]) if (extra) homes.push(resolve(extra));
-  if (homes.map(canonical).some(p => root === p || root.startsWith(p + sep))) return false;
+  for (const value of [process.env.CODEX_HOME, process.env.CLAUDE_CONFIG_DIR])
+    for (const extra of value?.split(',') ?? []) if (extra.trim()) homes.push(resolve(extra.trim()));
+  const comparable = (p: string) => p.normalize('NFC').toLowerCase();
+  const destination = comparable(root);
+  if (homes.map(p => comparable(canonical(p))).some(p => destination === p || destination.startsWith(p + sep))) return false;
   for (let dir = root; ; dir = dirname(dir)) {
     try {
       const info = statSync(dir);
@@ -31,7 +34,7 @@ function trustedRoot(path: string) {
       if (process.getuid && (info.uid !== process.getuid() && info.uid !== 0 ||
           ((info.mode & 0o022) !== 0 && !(dir !== root && info.uid === 0 && (info.mode & 0o1000))))) return false;
     } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-    if (dir === dirname(dir)) return true;
+    if (dir === dirname(dir)) return root;
   }
 }
 
@@ -48,9 +51,10 @@ export async function observeCompact(root: string) {
     const event = input.parse(JSON.parse(Buffer.concat(chunks).toString('utf8')));
     const session = createHash('sha256').update(event.session_id).digest('hex');
     const label = phase.safeParse(process.env.DECADRA_PHASE);
-    if (!trustedRoot(root)) return;
-    mkdirSync(root, { recursive: true, mode: 0o700 });
-    const path = join(root, 'compact.sqlite');
+    const destination = trustedRoot(root);
+    if (!destination) return;
+    mkdirSync(destination, { recursive: true, mode: 0o700 });
+    const path = join(destination, 'compact.sqlite');
     const fd = openSync(path, constants.O_CREAT | constants.O_RDWR | constants.O_NOFOLLOW | constants.O_NONBLOCK, 0o600);
     try {
       const file = fstatSync(fd);

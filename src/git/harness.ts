@@ -70,7 +70,8 @@ export async function checkHarness(cwd: string) {
   const visited = new Set<string>();
   const missing: string[] = [];
   async function walk(file: string, depth: number): Promise<void> {
-    if (depth > 5 || visited.size >= 64 || !within(root, file)) { unknown = true; return; }
+    if (depth > 5) return;
+    if (visited.size >= 64 || !within(root, file)) { unknown = true; return; }
     try {
       const path = await realpath(file);
       if (!within(root, path)) { unknown = true; return; }
@@ -80,11 +81,15 @@ export async function checkHarness(cwd: string) {
       if (!info.isFile() || info.size > 262144) { unknown = true; return; }
       const lines = (await readFile(path, 'utf8')).split(/\r?\n/);
       let fence = '';
+      const paragraphs: string[] = [];
       for (const line of lines) {
         const marker = /^\s*(`{3,}|~{3,})/.exec(line)?.[1];
         if (marker && (!fence || marker.startsWith(fence))) { fence = fence ? '' : marker; continue; }
-        if (fence) continue;
-        const prose = line.replace(/(`+).*?\1/g, ' ');
+        if (fence || /^(?: {4}|\t)/.test(line)) continue;
+        paragraphs.push(line);
+      }
+      for (const paragraph of paragraphs.join('\n').split(/\n\s*\n/)) {
+        const prose = paragraph.replace(/(`+)[\s\S]*?\1/g, ' ');
         for (const match of prose.matchAll(/(?:^|\s)@([^\s`]+)/g)) {
           const ref = match[1]!.replace(/[.,;:!?]+$/, '');
           if (!ref.startsWith('~') && !isAbsolute(ref)) await walk(resolve(dirname(path), ref), depth + 1);

@@ -5,7 +5,7 @@ Decadra answers one question per AI coding provider: does the plan you pay for f
 ## Layers
 
 ```
-cli.ts           the command binary; index.ts is the module entry, routing core only
+cli.ts           the command binary
 commands/        wire the layers, own exit codes, validate section data with a per-command zod schema
    |
    |  reads          analysis/ (pure)             report/ (renders a Report value)
@@ -23,7 +23,6 @@ ui/               home screen, agent detection (stdout and stdin only)
 - `analysis/` is pure: `planfit.ts` (effective cost under every plan, the verdict), `months.ts` and `windows.ts` (calendar buckets, rolling peaks), `effort.ts` (medians and commit shares), `alert-rules.ts`.
 - `report/model.ts` defines `Report` and `ProviderSection`. `report/render.ts` is the only loop over providers. Each format implements `renderSection(section)`.
 - `commands/deps.ts` is the test seam: a ccusage runner, a clock, an environment, a cwd. Tests inject fixtures and a fixed date; nothing is spawned.
-- `routing/schema.ts` and `routing/lifecycle.schema.ts` define the metadata contracts. `analysis/routing.ts` and `analysis/routing-lifecycle.ts` evaluate eligibility, contracts and derived attempt outcomes without side effects. `routing/core.ts` is the one implementation of every routing decision, built by `createDecadraCore` with an injected clock, environment, paths and store. `store/routing.ts` indexes the append only file once per read and admits records through one function shared by reads and appends. `commands/route.ts` is an adapter that reads a file, calls the core and prints. `src/index.ts` exports the core and its contracts as the package module. Routing has no execution or network interface. See `docs/routing.md`, `docs/module.md` and decisions 0009 and 0010.
 
 ## One request, end to end: `decadra assess --months 3`
 
