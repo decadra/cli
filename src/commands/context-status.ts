@@ -13,7 +13,7 @@ const settings = z.object({
 
 async function savedLayer(path: string, scope: string) {
   try {
-    const config = settings.parse(parse(await readFile(path, 'utf8')));
+    const config = settings.parse(parse(await readFile(path, 'utf8'), { integersAsBigInt: 'asNeeded' }));
     return { scope, path, state: 'read', thresholdTokens: config.model_auto_compact_token_limit ?? null,
       countingScope: config.model_auto_compact_token_limit_scope ?? null };
   } catch (error) {

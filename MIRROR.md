@@ -68,6 +68,9 @@ These files exist upstream in a fuller form. The differences are the parts that
 reference the modules listed above, plus the build not emitting source maps.
 
 - `.github/workflows/ci.yml`
+- `README.md`
+- `docs/architecture/commands.md`
+- `docs/testing/README.md`
 - `package.json`
 - `src/cli.ts`
 - `src/config/settings.ts`

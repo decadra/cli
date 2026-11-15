@@ -58,6 +58,7 @@ async function run(): Promise<void> {
   program.command('harness').command('check').description('check explicit repository instruction imports').action(async () => {
     const ctx = makeContext(program);
     const result = await checkHarness(process.cwd());
+    if (result.state === 'missing') process.exitCode = 1;
     if (ctx.format === 'json') return ctx.write(JSON.stringify(result));
     ctx.write(`Repository instructions: ${result.state}`);
     ctx.write(`Global Codex: ${result.globalFiles.codex ?? 'missing'}`);

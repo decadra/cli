@@ -67,6 +67,10 @@ edit('src/config/settings.ts', (s) =>
 );
 
 // The public package ships only the command line entry.
+edit('README.md', s => s.replace(/The package also exports a programmatic routing core[^.]*\(.*?\); the command line is built on it\. /, ''));
+edit('docs/architecture/commands.md', s => s.split('\n').filter(line =>
+  !line.startsWith('| `route ') && !line.startsWith('`route record`') && !line.startsWith('The route commands are adapters')).join('\n'));
+edit('docs/testing/README.md', s => s.replace(/ `npm run test:consumer` packs .*?contract\./, '').replace('CI runs both', 'CI runs the suite'));
 edit('tsup.config.ts', (s) => s.replace(/^ {2}\{ \.\.\.shared, entry: \{ index: 'src\/index\.ts' \}[^\n]*\n/m, ''));
 edit('package.json', (s) => {
   const pkg = JSON.parse(s);

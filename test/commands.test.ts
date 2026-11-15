@@ -16,7 +16,7 @@ describe('assess', () => {
     const h = await harness();
     const { defaultPlans } = await import('../src/config/plans');
     const plans = defaultPlans();
-    plans.providers['manual-provider'] = { ...plans.providers['cursor']!, displayName: 'Manual provider' };
+    plans.providers['manual-provider'] = { ...plans.providers['cursor']!, displayName: 'Manual provider', ingest: { kind: 'manual' } };
     await writeFile(h.ctx.paths.plans, JSON.stringify(plans));
     const providers = ['cursor', 'manual-provider'];
     expect(await runAssess(h.ctx, { months: 1, provider: providers }, h.deps)).toBe(0);

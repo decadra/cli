@@ -95,7 +95,7 @@ Decadra reads the session logs that Claude Code, Codex, Cursor, Devin and Muse C
 
 ## Status
 
-0.4.0, unreleased. `now`, `assess`, `sessions`, `setup`, `alerts`, `baseline` and `doctor` work for Claude Code and Codex. Cursor import and the Devin and Muse readers need real fixtures and are the next slice. The package also exports a programmatic routing core for orchestrators (`docs/module.md`); the command line is built on it. Architecture in `docs/architecture/`, the provider contract in `docs/adding-a-provider.md`, plans in `docs/plans/`, decision records in `docs/decisions/`, test criteria in `docs/testing/`, and what the search found about demand in `docs/demand-notes.md`. Agents working in this repo read `AGENTS.md`.
+0.4.0, unreleased. `now`, `assess`, `sessions`, `setup`, `alerts`, `baseline` and `doctor` work for Claude Code and Codex. Cursor import and the Devin and Muse readers need real fixtures and are the next slice. Architecture in `docs/architecture/`, the provider contract in `docs/adding-a-provider.md`, plans in `docs/plans/`, decision records in `docs/decisions/`, test criteria in `docs/testing/`, and what the search found about demand in `docs/demand-notes.md`. Agents working in this repo read `AGENTS.md`.
 
 ## Use
 
