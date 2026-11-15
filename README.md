@@ -18,6 +18,47 @@ Per provider, never across providers.
 
 </div>
 
+## Starting work in a repository
+
+Run `decadra context status` to see saved Codex compaction thresholds in tokens.
+The command reads global and project settings. An unspecified value means that
+file leaves the threshold unset. The active session may use other settings.
+
+Run `decadra harness check` to follow explicit repository instruction imports.
+For example, if `CLAUDE.md` imports `@AGENTS.md` and the target is missing,
+the check names the missing file. Both commands support `--json`.
+
+Use `decadra sessions --here --provider openai-codex` to inspect duration and
+tool calls for sessions associated with this Git repository. Linked worktrees
+share a repository identity. Sessions with an unknown working directory are
+excluded from this view.
+
+### Optional local compaction pilot
+
+To try the observer, install this version of the package so that
+`decadra-observe` is on the host's PATH. Add these two entries to the
+existing `hooks` object in a disposable project's Claude Code settings:
+
+```json
+{
+  "PreCompact": [{"hooks": [{"type": "command", "command": "decadra-observe || true", "timeout": 2}]}],
+  "PostCompact": [{"hooks": [{"type": "command", "command": "decadra-observe || true", "timeout": 2}]}]
+}
+```
+
+The example uses a POSIX shell. Keep existing hook entries when adding or
+removing the observer. Optionally set `DECADRA_PHASE` to `implementation`,
+`verification` or `handoff` in the launching environment. An absent or
+unrecognized phase is recorded as unknown. Use the host's manual compaction
+control in a disposable session, then inspect UTC timestamps locally:
+
+```sh
+sqlite3 "${DECADRA_HOME:-$HOME/.decadra}/compact.sqlite" 'select utc, kind, phase from compact_v1 order by rowid desc limit 10'
+```
+
+To stop observation, remove the two observer entries and start a fresh session.
+Existing observations remain available locally.
+
 ```
 Decadra v0.4.0
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -49,7 +90,7 @@ Decadra reads the session logs that Claude Code, Codex, Cursor, Devin and Muse C
 
 ## Status
 
-0.4.0, unreleased. `now`, `assess`, `sessions`, `setup`, `alerts`, `baseline` and `doctor` work for Claude Code and Codex. Cursor import and the Devin and Muse readers need real fixtures and are the next slice. Architecture in `docs/architecture/`, the provider contract in `docs/adding-a-provider.md`, plans in `docs/plans/`, decision records in `docs/decisions/`, test criteria in `docs/testing/`, and what the search found about demand in `docs/demand-notes.md`. Agents working in this repo read `AGENTS.md`.
+0.4.0, unreleased. `now`, `assess`, `sessions`, `setup`, `alerts`, `baseline` and `doctor` work for Claude Code and Codex. Cursor import and the Devin and Muse readers need real fixtures and are the next slice. The package also exports a programmatic routing core for orchestrators (`docs/module.md`); the command line is built on it. Architecture in `docs/architecture/`, the provider contract in `docs/adding-a-provider.md`, plans in `docs/plans/`, decision records in `docs/decisions/`, test criteria in `docs/testing/`, and what the search found about demand in `docs/demand-notes.md`. Agents working in this repo read `AGENTS.md`.
 
 ## Use
 
@@ -89,13 +130,10 @@ decadra baseline list    every snapshot, newest first, with the current one per 
 decadra assess           plan fit and effective cost under every plan, per provider
 decadra doctor           check config, every provider's local data, pricing coverage, git and ccusage
 decadra sessions         turns, duration, and commit signals per session, medians per provider
-decadra import cursor    load the official Cursor usage export                        (0.4.0)
-decadra usage add        manual monthly usage for cloud-only sessions                 (0.4.0)
-decadra prices refresh   opt-in price refresh, the only network call                  (0.5.0)
 decadra alerts check     plan-change alerts from stored verdict history; quiet unless one fires
 ```
 
-Everything runs offline. ccusage, which Decadra bundles for token and cost ingest, is always invoked with `--offline`. Price refreshes and vendor API pulls are separate opt-in commands.
+Everything runs offline. ccusage, which Decadra bundles for token and cost ingest, is always invoked with `--offline`. Price refreshes, vendor imports, manual usage entry and predictive capacity commands are deferred and are not exposed as executable placeholders.
 
 ## What it will never do
 

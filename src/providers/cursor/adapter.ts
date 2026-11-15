@@ -25,7 +25,7 @@ export const cursor: ProviderAdapter = {
       existsSync(db)
         ? check(this.id, 'cursor.stateDb', 'ok', `${db} present`, 'opened read-only when needed')
         : check(this.id, 'cursor.stateDb', 'absent', `${db} not found`),
-      check(this.id, 'cursor.import', 'warn', 'dollar figures come from the official CSV export', 'Settings, Usage, Export, then: decadra import cursor <file.csv> (not built yet)'),
+      check(this.id, 'cursor.import', 'warn', 'dollar figures come from the official CSV export', 'CSV usage import is unavailable; local session metadata remains readable'),
     ];
   },
 };

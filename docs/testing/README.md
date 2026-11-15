@@ -11,4 +11,4 @@ Four layers. A change is done when all four hold.
 
 Fixtures are real files, redacted with the `redact-fixture` skill, never synthetic. See `test/fixtures/README.md`.
 
-`npm run check` runs lint, typecheck, unit, scenario, and invariant tests, then the build. CI runs the same on Node 22 and 24 and then `decadra doctor --json` on an empty config dir.
+`npm run check` runs lint, typecheck, unit, scenario, and invariant tests, then the build. `npm run test:consumer` packs that build, installs it in a fresh external project and verifies the public module contract. CI runs both on Node 22 and 24 and runs `decadra doctor --json` on an empty config dir.

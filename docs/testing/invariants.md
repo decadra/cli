@@ -6,7 +6,24 @@ Properties that must hold for every input, and where each is checked. Add a row 
 |---|---|
 | Shadow routing cannot spawn executors, contact the network or feed provider reports | `test/routing-invariants.test.ts`, ESLint import fences |
 | Routing accepts only metadata contracts, computes mandatory gate success and hashes evaluator references | `test/routing-schema.test.ts`, `test/routing-command.test.ts` |
-| Routing evidence and usage remain scoped to one configuration, role and benchmark suite | `test/routing-command.test.ts`, `test/routing-policy.test.ts` |
+| Routing evidence and usage remain scoped to one configuration, role and benchmark suite, and unscoped aggregation functions are not public | `test/routing-command.test.ts`, `test/routing-policy.test.ts`, `test/routing-core.test.ts`, `test/routing-lifecycle-stats.test.ts` |
+| The routing core never prints, exits or reads a terminal, takes clock, environment, paths and store from options, and resolves relative module paths against the injected working directory | `test/routing-core.test.ts` |
+| Public routing selections, attempt references and assessment contexts reject unknown fields | `test/routing-core.test.ts` |
+| The command line and the module produce identical routing decisions for identical inputs | `test/routing-core.test.ts` |
+| A routing record with a schema version this build does not know is refused by name, never read as malformed or migrated, including seeded memory history | `test/routing-lifecycle.test.ts`, `scripts/consumer-smoke.mjs` |
+| Version 1 statistics receipts keep their strict shape while current statistics use the version 2 lifecycle envelope | `test/routing-lifecycle-stats.test.ts` |
+| A worker's exit status is advisory: exit zero without a qualifying artifact derives a no op, never a success | `test/routing-lifecycle.test.ts` |
+| Capability mismatch, mechanical verification, review acceptance and integration are distinct derived states, and dependent evidence is observed and recorded no earlier than the effective artifact | `test/routing-lifecycle.test.ts` |
+| Attempt identity is immutable; corrections append with a predecessor; a repair is a linked attempt that removes the repaired one from clean evidence and supersedes its delivered class | `test/routing-lifecycle.test.ts`, `test/routing-core.test.ts` |
+| A non null session hash starts exactly one attempt while null sessions and identical start replays remain admissible | `test/routing-lifecycle.test.ts` |
+| No gate id, criterion id, session reference or configuration alias reaches the routing store unhashed | `test/routing-lifecycle.test.ts`, `test/routing-core.test.ts` |
+| Unknown lifecycle measurements and capacity stay null and are counted as missing, never zero | `test/routing-lifecycle.test.ts`, `test/routing-factory.test.ts`, `test/routing-lifecycle-stats.test.ts`, `scripts/consumer-smoke.mjs` |
+| A factory delivery deduplicates on producer hash and delivery id under the store lock; an exact retry replays the original event identity and a changed request conflicts, with no sidecar state | `test/routing-factory.test.ts`, `scripts/consumer-smoke.mjs` |
+| A duplicate delivery refused inside a mutation is checked before any index mutation, so no dependent event can persist against it | `test/routing-factory.test.ts` |
+| Factory attempts run executor only, match the recorded pool, and factory supplied binding hashes persist unchanged; neither legacy path records against a factory decision nor the reverse | `test/routing-factory.test.ts`, `scripts/consumer-smoke.mjs` |
+| Factory eligibility evidence counts independent parent tasks, so sibling children of one parent count once | `test/routing-factory.test.ts` |
+| A factory explanation is a strict locked read of the original decision, labels evidence as the pool minimum of independent parent or task units, exposes no individual suitability or raw inputs, appends nothing and does not reinterpret current settings or later evidence | `test/routing-explanation.test.ts`, `scripts/consumer-smoke.mjs` |
+| `src/index.ts` exports the routing core only and imports no ui, report, command, ingest, provider or network module | `test/package-exports.test.ts`, ESLint import fences |
 | No rendered line contains two provider display names and a currency amount, except the bill line | `test/guard.test.ts` over golden and fuzzed reports in all three formats |
 | No rendered text contains a comparison phrase (`switch to`, `cheaper than`, `better than`, `vs`, `rank`, ...) | `test/guard.test.ts` |
 | Providers render in alphabetical order regardless of insertion order or any metric | `test/guard.test.ts` |
@@ -22,7 +39,7 @@ Properties that must hold for every input, and where each is checked. Add a row 
 | Tests resolve fixture and source paths with `fileURLToPath`, never `URL.pathname`, which yields `/C:/...` on Windows | CI runs the suite on `ubuntu-latest` and `windows-latest` |
 | `fetch` appears only under `src/net/` | ESLint `no-restricted-globals`, `test/invariants.test.ts` |
 | No source file names a decadra version, or points at `docs/PLAN.md` | `test/invariants.test.ts` |
-| Every planned capability names what it gets you and what is missing, promises no version, and answers on the command line with exit 2 | `test/roadmap.test.ts` |
+| Help exposes implemented commands only; deferred commands are rejected while legacy outcome ingestion remains available | `test/command-surface.test.ts` |
 | `src/providers` and `src/ingest` never write files, except the ccusage config under `cache/` | `test/invariants.test.ts` |
 | `src/analysis` imports no filesystem, process, provider, or store module | ESLint `no-restricted-imports`, `test/invariants.test.ts` |
 | `src/report` imports nothing from analysis, ingest, providers, config, store, net, git | ESLint `no-restricted-imports` |

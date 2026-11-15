@@ -47,3 +47,6 @@ For a person, or a local Claude Code session driving a real terminal. Run from t
 - [ ] Run controlled and ecological attempts separately from the same immutable snapshot. Keep hidden checks outside the worker checkout. Confirm statistics never blend the suites.
 - [ ] Confirm the local event file contains no prompt, source, patch, command or result bodies. Decadra creates no remote connection.
 - [ ] Attempt a tiny executor task using existing quota. Record authentication, permission or quota failures honestly. Do not count unavailable telemetry as zero consumption or an execution success.
+- [ ] For that attempt, submit started, artifact, gates and closed observations with `route observe`, then `route attempt`. Confirm the derived class matches what happened, and that an attempt closed with exit zero but no artifact reads as a no op.
+- [ ] Submit a `capacity-observed` snapshot with `remaining: null`, then `route capacity`. Confirm the unit and source are the provider's own and the null stays null.
+- [ ] Run `npm run test:consumer`. Confirm it packs, installs into a fresh external project, exercises the factory lifecycle, reloads corrected history, type checks and cleans up.

@@ -104,7 +104,7 @@ export async function collectChecks(ctx: CommandContext, deps?: CommandDeps): Pr
     const days = Math.floor((Date.now() - s.mtimeMs) / 86_400_000);
     checks.push(check(null, 'prices.cache', days > 30 ? 'warn' : 'ok', `price cache is ${days} day(s) old`));
   } else {
-    checks.push(check(null, 'prices.cache', 'ok', 'no price cache; ccusage offline table and plans.json modelPricing in use', 'opt in to a refresh with: decadra prices refresh (not built yet)'));
+    checks.push(check(null, 'prices.cache', 'ok', 'no price cache; ccusage offline table and plans.json modelPricing in use', 'maintain modelPricing in plans.json; automatic price refresh is unavailable'));
   }
 
   const env = deps?.env ?? defaultDoctorEnv();

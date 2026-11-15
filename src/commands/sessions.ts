@@ -6,6 +6,7 @@ import { todayUtc } from '../analysis/months';
 import { formatMinutes } from '../analysis/units';
 import { summarizeEffort, type CommitSignals } from '../analysis/effort';
 import { commitsInWindow } from '../git/commits';
+import { repositorySessions } from '../git/session-scope';
 import type { SessionRecord } from '../ingest/types';
 import { hiddenNote, resolveAdapters, visibleProviders } from '../providers/registry';
 import { listBaseline } from '../store/baseline';
@@ -17,7 +18,7 @@ import { CliError, type CommandContext } from './context';
 import { defaultDeps, type CommandDeps } from './deps';
 import { sessionsSectionSchema, type SessionsSection } from './sessions.schema';
 
-export type SessionsOptions = AssessOptions;
+export type SessionsOptions = AssessOptions & { here?: boolean };
 
 const pct = (v: number | null): string => (v === null ? 'n/a' : `${Math.round(v * 100)}%`);
 const ms = (s: { median: number; p90: number }): string => `median ${s.median}, p90 ${s.p90}`;
@@ -172,6 +173,7 @@ export async function runSessions(ctx: CommandContext, opts: SessionsOptions, de
   const window = resolveWindow(opts, today);
   const adapters = resolveAdapters(plans);
   const wanted = opts.provider?.length ? opts.provider : null;
+  if (opts.here && wanted?.length !== 1) throw new CliError('--here requires exactly one --provider');
   if (wanted) for (const id of wanted) if (!adapters.some((a) => a.id === id)) throw new CliError(`unknown provider ${id}; known: ${adapters.map((a) => a.id).join(', ')}`);
   // Naming a provider is asking for it by name, so --provider overrides visibility entirely.
   const { records: baselineRecords } = await listBaseline(ctx.paths.baseline);
@@ -192,7 +194,7 @@ export async function runSessions(ctx: CommandContext, opts: SessionsOptions, de
     if (adapter.sessions) {
       try {
         const result = await adapter.sessions.read({ since: window.since, until: window.until, idleGapMinutes: settings.idleGapMinutes }, d.env);
-        records = result.sessions;
+        records = opts.here ? await repositorySessions(result.sessions, process.cwd()) : result.sessions;
         filesRead = result.filesRead;
         signals = await commitSignalsFor(records, settings.commitWindowMinutes, lookup);
       } catch (e) {

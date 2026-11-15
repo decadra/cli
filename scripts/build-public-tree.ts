@@ -66,8 +66,23 @@ edit('src/config/settings.ts', (s) =>
     ),
 );
 
+// The public package ships only the command line entry.
+edit('tsup.config.ts', (s) => s.replace(/^ {2}\{ \.\.\.shared, entry: \{ index: 'src\/index\.ts' \}[^\n]*\n/m, ''));
+edit('package.json', (s) => {
+  const pkg = JSON.parse(s);
+  delete pkg.exports;
+  delete pkg.types;
+  delete pkg.scripts['test:consumer'];
+  return JSON.stringify(pkg, null, 2) + '\n';
+});
+
+// The module consumer check is private along with the module entry.
+edit('.github/workflows/ci.yml', (s) =>
+  s.replace(/^ {10}cd "\$GITHUB_WORKSPACE"\n {10}npm run test:consumer\n/m, ''),
+);
+
 // Source maps embed the original sources, which would republish what was excluded.
-edit('tsup.config.ts', (s) => s.replace(/^\s*sourcemap: true,\n/m, '  sourcemap: false,\n'));
+edit('tsup.config.ts', (s) => s.replace(/\bsourcemap: true\b/, 'sourcemap: false'));
 
 writeFileSync(
   join(out, 'MIRROR.md'),

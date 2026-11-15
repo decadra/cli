@@ -14,6 +14,18 @@ Collect observations under multiple executor configurations and both benchmark s
 
 Open the real redacted database through the provider reader. Pass: hidden work is excluded, unknown or missing telemetry remains absent, message content does not enter normalized records, the source is never modified and doctor distinguishes installation from actual visible activity. Executable in `test/devin-reader.test.ts`.
 
+## R4 Attempt lifecycle through observations
+
+An orchestrator runs an attempt externally and submits started, capability, artifact, gate, review, integration and closed observations. Pass: exit zero without a qualifying artifact is a no op, a capability mismatch remains the diagnosis after artifact progress, a mechanically passing visual task rejected in review is mechanically verified but not accepted, a review pass with a failed integration is not delivered, an artifact correction invalidates dependent evidence recorded before it even at the same observation time, recorded effort remains visible after invalidation, every non null session starts only one attempt, a repair started in a fresh session is a linked attempt that removes the repaired attempt from clean evidence and supersedes its delivered class, identical resubmission is idempotent, a changed observation needs an explicit correction, attempt identity cannot change, and the stored file only grows. Executable in `test/routing-lifecycle.test.ts` and `test/routing-core.test.ts`.
+
+## R4b Factory producer deliveries
+
+A producer submits bounded assessments and lifecycle observations under a delivery id. Pass: supplied binding hashes persist unchanged and no interactive Primary is recorded, attempts run executor only against the recorded pool, an exact retry after a lost response and core restart returns the original event id with recorded false even after later corrections, a changed request on the same delivery id conflicts, a fresh delivery id on recorded evidence requires a correction naming the current latest event, a refused duplicate delivery never leaves dependent events behind, sibling children of one parent task count as one evidence unit, verified, review accepted and integrated remain distinct, unknown optional telemetry stays null after reload, malformed history is refused on reload, and the legacy paths cannot record against factory decisions. A historical explanation preserves the factory decision and assessment time, identifies the evidence count as the pool minimum of independent parent or task units, leaves individual suitability and prediction quality unavailable, and remains unchanged by current settings or later evidence. Executable in `test/routing-factory.test.ts`, `test/routing-explanation.test.ts` and `scripts/consumer-smoke.mjs`.
+
+## R5 Module and command line parity
+
+The same manifest, outcome and observations go through `createDecadraCore` and through the `route` commands. Pass: decisions, derived outcomes, version 2 statistics and capacity snapshots are identical apart from generated ids and times; saved version 1 statistics remain valid against their dedicated schema; public query objects reject unknown fields; the core produces no stdout, stderr or exit; a packed tarball installs in a directory outside the tree, imports, type checks and round trips a lifecycle. Executable in `test/routing-core.test.ts`, `test/package-exports.test.ts` and `scripts/consumer-smoke.mjs`.
+
 ## S1 First run on a clean machine
 
 A developer installs, runs `decadra doctor` with no config dir. Pass: `plans.json` and its schema are created; every provider is listed found or absent without error; a second run creates nothing and changes nothing; exit 0 when no model is zero-priced. Executable.

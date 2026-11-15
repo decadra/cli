@@ -141,7 +141,7 @@ export async function runNow(ctx: CommandContext, opts: NowOptions, deps?: Comma
     kv.push(['last verdict', last ? `${last.direction}, ${last.confidence} confidence, ${last.recordedAt.slice(0, 10)}` : 'none yet (decadra assess)']);
     const blocks: Block[] = [{ kind: 'kv', rows: kv }];
     if (usage.error) blocks.push({ kind: 'note', text: `error: ${usage.error}` });
-    if (usage.source === 'none') blocks.push({ kind: 'note', text: 'no local usage data for this provider yet; import, a native reader, and manual entry are not built yet' });
+    if (usage.source === 'none') blocks.push({ kind: 'note', text: 'no supported local usage source is available for this provider' });
     if (usage.zeroPricedModels.length) blocks.push({ kind: 'note', text: `priced at $0 with tokens present: ${usage.zeroPricedModels.join(', ')}; add to modelPricing in plans.json` });
     if (opts.timing) blocks.push({ kind: 'note', text: `${data.elapsedMs} ms` });
     return { provider: adapter.id, displayName: adapter.displayName, data, blocks };
