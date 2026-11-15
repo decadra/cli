@@ -14,9 +14,7 @@ All commands accept `--json` and `--config-dir <dir>`. `--html <file>` is declar
 | `alerts list` | alerts | | fired alerts | 0 |
 | `alerts schedule --weekly|--daily --print` | | | crontab line or launchd plist | 0; 1 without `--print` |
 | `doctor` | everything above, adapters' directories | pricing coverage over the last 30 days | table | 0, or 1 if any check failed |
-| `route shadow <manifest.json>` | Primary environment, routing settings, local events | bounded executor eligibility | strict metadata receipt | 0; 1 on invalid input or unsupported shell |
-| `route record <outcome.json>` | contract and configuration snapshot, local events | weighted score and mandatory gate verification | strict metadata receipt; appends outcome or correction | 0; 1 on invalid input |
-| `route stats [--pool id] [--configuration id] [--role role] [--suite suite]` | local routing events | one configuration's observations | strict statistics object | 0; 1 on ambiguous selection or invalid history |
-| `import`, `usage`, `prices` | | | "arrives in 0.x.0" | 2 |
+
+
 
 JSON output of `now`, `assess`, and `sessions` is a `Report`: `schemaVersion`, `generatedAt`, `timezone`, `window`, `caveats`, `bill`, `providers`. Each provider entry is `{ provider, displayName, data }` where `data` is validated by `src/commands/<command>.schema.ts`.

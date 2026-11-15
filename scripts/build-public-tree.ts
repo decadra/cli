@@ -66,8 +66,32 @@ edit('src/config/settings.ts', (s) =>
     ),
 );
 
+// The public package ships only the command line entry.
+edit('docs/testing/manual-checklist.md', s => s.replace(/\n## Shadow routing\b[\s\S]*?(?=\n## |$)/, '').trimEnd() + '\n');
+edit('docs/testing/scenarios.md', s => s.replace(/^## R(?!3 )[^\n]*\n[\s\S]*?(?=^## )/gm, ''));
+edit('docs/architecture/data-files.md', s => s.split('\n').filter(line =>
+  !line.startsWith('| `routing-events.jsonl`') && !line.startsWith('Optional `settings.json` routing pools')).join('\n').trimEnd() + '\n');
+edit('docs/architecture/overview.md', s => s.replace('; index.ts is the module entry, routing core only', '').split('\n').filter(l => !l.startsWith('- `routing/schema.ts`')).join('\n'));
+edit('README.md', s => s.replace(/The package also exports a programmatic routing core[^.]*\(.*?\); the command line is built on it\. /, ''));
+edit('docs/architecture/commands.md', s => s.split('\n').filter(line =>
+  !line.startsWith('| `route ') && !line.startsWith('`route record`') && !line.startsWith('The route commands are adapters')).join('\n'));
+edit('docs/testing/README.md', s => s.replace(/ `npm run test:consumer` packs .*?contract\./, '').replace('CI runs both', 'CI runs the suite'));
+edit('tsup.config.ts', (s) => s.replace(/^ {2}\{ \.\.\.shared, entry: \{ index: 'src\/index\.ts' \}[^\n]*\n/m, ''));
+edit('package.json', (s) => {
+  const pkg = JSON.parse(s);
+  delete pkg.exports;
+  delete pkg.types;
+  delete pkg.scripts['test:consumer'];
+  return JSON.stringify(pkg, null, 2) + '\n';
+});
+
+// The module consumer check is private along with the module entry.
+edit('.github/workflows/ci.yml', (s) =>
+  s.replace(/^ {10}cd "\$GITHUB_WORKSPACE"\n {10}npm run test:consumer\n/m, ''),
+);
+
 // Source maps embed the original sources, which would republish what was excluded.
-edit('tsup.config.ts', (s) => s.replace(/^\s*sourcemap: true,\n/m, '  sourcemap: false,\n'));
+edit('tsup.config.ts', (s) => s.replace(/\bsourcemap: true\b/, 'sourcemap: false'));
 
 writeFileSync(
   join(out, 'MIRROR.md'),

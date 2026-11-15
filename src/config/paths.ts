@@ -26,10 +26,11 @@ function chosen(value: string | undefined): string | null {
   return v ? v : null;
 }
 
-export function resolvePaths(configDir?: string | undefined): DecadraPaths {
+export function resolvePaths(configDir?: string | undefined, env: NodeJS.ProcessEnv = process.env): DecadraPaths {
   // Relative values are resolved once, here, so every path in the app is absolute and
-  // does not change meaning when a command changes directory.
-  const root = resolve(chosen(configDir) ?? chosen(process.env['DECADRA_HOME']) ?? join(homedir(), '.decadra'));
+  // does not change meaning when a command changes directory. The environment is a
+  // parameter so an embedding host can point at a directory without touching process.env.
+  const root = resolve(chosen(configDir) ?? chosen(env['DECADRA_HOME']) ?? join(homedir(), '.decadra'));
   return {
     root,
     plans: join(root, 'plans.json'),

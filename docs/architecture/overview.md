@@ -5,6 +5,7 @@ Decadra answers one question per AI coding provider: does the plan you pay for f
 ## Layers
 
 ```
+cli.ts           the command binary
 commands/        wire the layers, own exit codes, validate section data with a per-command zod schema
    |
    |  reads          analysis/ (pure)             report/ (renders a Report value)
@@ -22,7 +23,6 @@ ui/               home screen, agent detection (stdout and stdin only)
 - `analysis/` is pure: `planfit.ts` (effective cost under every plan, the verdict), `months.ts` and `windows.ts` (calendar buckets, rolling peaks), `effort.ts` (medians and commit shares), `alert-rules.ts`.
 - `report/model.ts` defines `Report` and `ProviderSection`. `report/render.ts` is the only loop over providers. Each format implements `renderSection(section)`.
 - `commands/deps.ts` is the test seam: a ccusage runner, a clock, an environment, a cwd. Tests inject fixtures and a fixed date; nothing is spawned.
-- `routing/schema.ts` defines metadata contracts. `analysis/routing.ts` evaluates eligibility and outcomes without side effects. `commands/route.ts` connects those functions to the local append only routing store. Routing has no execution or network interface. See `docs/routing.md` and decision 0009.
 
 ## One request, end to end: `decadra assess --months 3`
 

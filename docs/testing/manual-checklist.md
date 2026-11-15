@@ -38,12 +38,3 @@ For a person, or a local Claude Code session driving a real terminal. Run from t
 
 - [ ] `alerts check` with fewer than two months of verdicts: prints nothing, exit 0.
 - [ ] `alerts schedule --weekly --print`: the entry references the right node and cli path for this machine.
-
-## Shadow routing
-
-- [ ] In each supported Primary, submit a strict metadata manifest using an isolated config directory. Confirm UTC receipt and insufficient evidence for a safe new task.
-- [ ] Repeat with a sensitive risk label. Confirm Primary only classification regardless of any historical successes.
-- [ ] Record independently run gates and resources, then view one configuration and role. Confirm a mandatory failure stays failed and missing usage is absent.
-- [ ] Run controlled and ecological attempts separately from the same immutable snapshot. Keep hidden checks outside the worker checkout. Confirm statistics never blend the suites.
-- [ ] Confirm the local event file contains no prompt, source, patch, command or result bodies. Decadra creates no remote connection.
-- [ ] Attempt a tiny executor task using existing quota. Record authentication, permission or quota failures honestly. Do not count unavailable telemetry as zero consumption or an execution success.

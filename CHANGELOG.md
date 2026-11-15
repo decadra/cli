@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 (unreleased)
+
+- Inspect saved compaction thresholds with `context status` and repository instruction imports with `harness check`.
+- Scope a single provider's session history to the current Git repository with `sessions --here`.
+- Receive optional local compaction events through the standalone `decadra-observe` executable.
+
 ## 0.4.0 (unreleased)
 
 - Local shadow routing: strict task contracts, fixed eligibility reasons, append-only outcome corrections and statistics for one route configuration, role and benchmark suite. No automatic dispatch, provider selection, shared usage unit or remote telemetry. Sparse history remains unknown. See `docs/routing.md`.

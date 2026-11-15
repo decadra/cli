@@ -4,6 +4,8 @@ Every plan that shaped the code, dated, kept as written. A plan is a record of w
 
 | Plan | Status | What it covers |
 |---|---|---|
+| `2026-09-27-joint-phase-three.md` | Contract hardening, historical assessment explanations and development evaluation foundation implemented; joint integration and later phases remain in progress | The verified public factory contract for Picagear, followed by persistent delivery, installed package integration, recovery cases, reporting, review, supervision, workflow stages, characterization and development evaluation |
+| `2026-09-14-routing-core-module.md` | implemented | The routing core as a module and command line over one implementation, version 2 lifecycle observations, derived attempt outcomes, lifecycle statistics, capacity snapshots, packaging and the mirror rules |
 | `2026-09-12-routing-shadow.md` | foundation implemented; repeated executor trials pending | Local shadow decisions, outcome contracts, configuration specific evidence, terminal executor database reader, and controlled experiments |
 | `2026-09-05-master-plan.md` | slices 1, 2, 3, 6 done; 4 and 5 open | Scope, stack, provider model, generic plan model, the verdict guard, the commit-proxy probe and its decision rule, what the original brief got wrong. Revision 3 scope decision at the top. |
 | `2026-09-05-slices-2-3-6.md` | done | `now` as the primary surface, the shared ccusage data layer, `assess`, the review findings that were folded in (pruning, exclusive session `--until`, cache-write pricing, Codex row shapes), then `sessions` and alerts. |

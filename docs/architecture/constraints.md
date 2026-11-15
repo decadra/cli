@@ -20,9 +20,10 @@ If a change needs an exception to any row, stop and say so instead of working ar
 - `src/providers/**`, `src/ingest/**`, `src/git/**`, `src/net/**` are the only modules that touch disk, spawn processes, or use the network.
 - `src/analysis/**` is pure over normalized records, no provider branches, no filesystem or process imports (ESLint).
 - `src/report/**` renders a `Report` value and nothing else.
-- `src/commands/**` wires layers, validates section data with a per-command strict schema, owns exit codes. Exit codes are identical for every provider: 0 success, 1 a provider's ingest failed, 2 command not built yet, 130 cancelled.
+- `src/commands/**` wires layers, validates section data with a per-command strict schema, owns exit codes. Exit codes are identical for every provider: 0 success, 1 a command or provider ingest failed, 130 cancelled.
 - `src/store/**` is append-only JSONL. Corrections append a record with `supersedes`.
 - `src/ui/**` writes stdout and reads keypresses. It renders no usage numbers.
+- `src/routing/**`, `src/analysis/routing*.ts`, `src/store/routing*.ts` and `src/index.ts` never import a process, network or report module (ESLint). The routing core never writes to stdout or stderr, never calls `process.exit`, never reads a terminal, and takes its clock, environment, paths and store from options. Every routing input and output carries a schema version, is validated by a strict schema, uses UTC, rejects unknown fields, and keeps unknown measurements null rather than zero.
 
 ## Reader budget
 

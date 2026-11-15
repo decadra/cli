@@ -95,9 +95,9 @@ export function buildAssessSection(adapter: ProviderAdapter, plans: PlansFile, u
     verdict = unknownVerdict(adapter.id, held, plans, `usage could not be read: ${usage.error}`);
     notes.push(`error: ${usage.error}`);
   } else if (usage.source === 'none') {
-    const how = adapter.usage.kind === 'import' ? `import (decadra import ${adapter.id} <file>)` : adapter.usage.kind === 'native' ? 'a native reader' : 'manual entry (decadra usage add)';
-    verdict = unknownVerdict(adapter.id, held, plans, `no usage data for this provider yet: ${how}.`);
-    notes.push(`no usage data for this provider yet: ${how}`);
+    const reason = 'no supported local usage source is available for this provider';
+    verdict = unknownVerdict(adapter.id, held, plans, reason);
+    notes.push(reason);
   } else {
     months = bucketMonths(usage.daily.map((d) => ({ date: d.date, cost: d.cost })), window, { minDays: 7, dataStart: usage.dataStart });
     const weekly = pp?.windows.some((w) => w.kind === 'weekly' && w.effectiveFrom <= window.until) ? weeklyPeak(usage.daily.map((d) => ({ date: d.date, cost: d.cost })), window) : null;

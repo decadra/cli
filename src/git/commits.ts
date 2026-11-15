@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { execa } from 'execa';
+import { discoveryEnv } from './session-scope';
 
 /** Read-only git log over a time window in one working directory. */
 export interface CommitInfo {
@@ -13,13 +14,13 @@ export type CommitLookup = { status: 'ok'; commits: CommitInfo[] } | { status: '
 export async function commitsInWindow(cwd: string, fromIso: string, toIso: string): Promise<CommitLookup> {
   if (!existsSync(cwd)) return { status: 'missing' };
   try {
-    const { stdout } = await execa('git', ['-C', cwd, 'rev-parse', '--is-inside-work-tree'], { timeout: 10_000 });
+    const { stdout } = await execa('git', ['-C', cwd, 'rev-parse', '--is-inside-work-tree'], { timeout: 10_000, extendEnv: false, env: discoveryEnv() });
     if (stdout.trim() !== 'true') return { status: 'not-a-repo' };
   } catch {
     return { status: 'not-a-repo' };
   }
   try {
-    const { stdout } = await execa('git', ['-C', cwd, 'log', `--since=${fromIso}`, `--until=${toIso}`, '--format=%H%x1f%cI%x1f%(trailers:key=Co-Authored-By,valueonly)%x1e'], { timeout: 20_000 });
+    const { stdout } = await execa('git', ['-C', cwd, 'log', `--since=${fromIso}`, `--until=${toIso}`, '--format=%H%x1f%cI%x1f%(trailers:key=Co-Authored-By,valueonly)%x1e'], { timeout: 20_000, extendEnv: false, env: discoveryEnv() });
     const commits: CommitInfo[] = [];
     for (const rec of stdout.split('\x1e')) {
       const [hash, ts, trailers] = rec.trim().split('\x1f');

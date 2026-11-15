@@ -11,8 +11,9 @@ import { fileURLToPath } from 'node:url';
 import { runDoctor } from './commands/doctor';
 import { offerSetupOnFirstRun, runSetup } from './commands/setup';
 import { detectAgent } from './ui/agent-env';
-import { runDocs, runPlanned } from './commands/planned';
-import { PLANNED } from './roadmap';
+import { runDocs } from './commands/docs';
+import { runContextStatus } from './commands/context-status';
+import { checkHarness } from './git/harness';
 import { CliError, type CommandContext, type OutputFormat } from './commands/context';
 import { showHome } from './ui/splash';
 
@@ -54,6 +55,22 @@ async function run(): Promise<void> {
     .showHelpAfterError();
 
   const baseline = program.command('baseline').description('append-only snapshots of every subscription you hold');
+  program.command('harness').command('check').description('check explicit repository instruction imports').action(async () => {
+    const ctx = makeContext(program);
+    const result = await checkHarness(process.cwd());
+    if (result.state === 'missing') process.exitCode = 1;
+    if (ctx.format === 'json') return ctx.write(JSON.stringify(result));
+    ctx.write(`Repository instructions: ${result.state}`);
+    ctx.write(`Global Codex: ${result.globalFiles.codex ?? 'missing'}`);
+    ctx.write(`Global Claude Code instructions: ${result.globalFiles.claude ? 'present' : 'missing'}`);
+    for (const layer of result.layers) {
+      ctx.write(`${layer.directory}\n  Codex: ${layer.codex ?? 'missing'}\n  Claude Code: ${layer.claude.join(', ') || 'missing'}`);
+    }
+    for (const file of result.missing) ctx.write(`Missing: ${file}`);
+    if (result.repair) ctx.write(result.repair);
+  });
+  const context = program.command('context').description('inspect context settings and observe native compaction');
+  context.command('status').description('inspect saved compaction settings').action(() => runContextStatus(makeContext(program)));
   baseline
     .command('add')
     .description('record a snapshot; prompts for anything missing on a terminal')
@@ -102,6 +119,7 @@ async function run(): Promise<void> {
 
   program
     .command('sessions')
+    .option('--here', 'show sessions for this Git repository with one --provider')
     .description('effort per session: turns, wall and active duration, tool calls, commit signals; medians per provider')
     .option('--months <n>', 'calendar months including the current one', number, 3)
     .option('--since <date>', 'YYYY-MM-DD, overrides --months')
@@ -149,17 +167,6 @@ async function run(): Promise<void> {
       process.exitCode = runAlertsSchedule(makeContext(program), opts, process.platform, process.execPath, fileURLToPath(import.meta.url));
     });
 
-  for (const name of Object.keys(PLANNED)) {
-    program
-      .command(name)
-      .description('planned; open work is listed in docs/plans/README.md')
-      .allowUnknownOption()
-      .allowExcessArguments()
-      .action(() => {
-        process.exitCode = runPlanned(makeContext(program), name);
-      });
-  }
-
   program.command('docs').description('where the manual lives').action(() => runDocs(makeContext(program)));
 
   program.action(async () => {
@@ -201,8 +208,6 @@ async function run(): Promise<void> {
         break;
       case 'exit':
         break;
-      default:
-        process.exitCode = runPlanned(ctx, choice);
     }
   });
 

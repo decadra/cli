@@ -48,7 +48,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/routing/**/*.ts', 'src/analysis/routing.ts', 'src/commands/route*.ts', 'src/store/routing.ts'],
+    files: ['src/routing/**/*.ts', 'src/analysis/routing*.ts', 'src/commands/route*.ts', 'src/store/routing*.ts', 'src/index.ts'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
@@ -75,7 +75,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/analysis/routing.ts'],
+    files: ['src/analysis/routing*.ts'],
     rules: {
       'no-restricted-imports': ['error', { patterns: [{
         group: [...new Set([...routingRestrictions, ...analysisRestrictions])],

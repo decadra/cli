@@ -13,3 +13,4 @@ Short, dated records of choices that constrain the code. One file per decision. 
 | 0007 | Output names no decadra version; a planned capability is named by its action, not its release |
 | 0008 | Context size is the cost driver, not effort; `sessions` leads with peak context per reply |
 | 0009 | Shadow executor eligibility records local metadata without selecting providers or dispatching work |
+| 0010 | Decadra supplies eligibility, evidence, capacity and outcome scoring as a module; the orchestrator owns dispatch, checks, pull requests and merging |

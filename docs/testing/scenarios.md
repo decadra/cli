@@ -2,14 +2,6 @@
 
 Each scenario is a developer workflow with pass criteria. The executable version is in `test/scenarios.test.ts` under the same id, or named as a manual step. When a scenario changes, change both.
 
-## R1 Shadow observation and outcome
-
-Inside either supported Primary, submit a metadata manifest for an explicitly configured Executor Pool. Pass: a receipt contains only opaque identifiers, fixed classification reasons and UTC metadata. No agent is launched. Record an externally verified result; mandatory failure cannot become success. Repeating a receipt is idempotent, and a correction appends without changing the original record. Executable in `test/routing-command.test.ts`.
-
-## R2 Evidence isolation
-
-Collect observations under multiple executor configurations and both benchmark suites. Pass: statistics require one configuration and role, native units remain separate, controlled and ecological evidence never mix, and sparse observations have no success probability or calibration claim. Executable in `test/routing-command.test.ts` and `test/routing-policy.test.ts`.
-
 ## R3 Current terminal executor database
 
 Open the real redacted database through the provider reader. Pass: hidden work is excluded, unknown or missing telemetry remains absent, message content does not enter normalized records, the source is never modified and doctor distinguishes installation from actual visible activity. Executable in `test/devin-reader.test.ts`.

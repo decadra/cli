@@ -23,7 +23,7 @@ interface ProviderAdapter {
 1. `ccusage`: the tool is one of ccusage's sources. The adapter names the source; tokens and cost come from `ccusage <source> daily|session --json --offline`. No reader is needed unless the effort metrics are wanted, in which case a reader supplies sessions only.
 2. `native`: the tool writes local logs ccusage does not read. A reader under the budget below extracts sessions and unit counts.
 3. `import`: the vendor offers an official export. A parser validates the header, normalizes rows, and dedupes by row hash across re-imports. The original file is kept verbatim under `~/.decadra/imports/<id>/`.
-4. `manual`: nothing else exists. Usage is entered per month with `decadra usage add`.
+4. `manual`: nothing else exists. Manual monthly usage entry is deferred; no command currently accepts it.
 
 Not accepted: undocumented dashboard endpoints, cookie or session-token authentication, scraping.
 

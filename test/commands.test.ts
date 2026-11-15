@@ -12,6 +12,23 @@ import { REPORT_TOP_LEVEL_KEYS } from '../src/report/model';
 import { harness, strip } from './harness';
 
 describe('assess', () => {
+  it('reports missing usage without persisting advice for removed commands', async () => {
+    const h = await harness();
+    const { defaultPlans } = await import('../src/config/plans');
+    const plans = defaultPlans();
+    plans.providers['manual-provider'] = { ...plans.providers['cursor']!, displayName: 'Manual provider', ingest: { kind: 'manual' } };
+    await writeFile(h.ctx.paths.plans, JSON.stringify(plans));
+    const providers = ['cursor', 'manual-provider'];
+    expect(await runAssess(h.ctx, { months: 1, provider: providers }, h.deps)).toBe(0);
+    const text = strip(h.out.join('\n'));
+    const history = await readFile(h.ctx.paths.verdicts, 'utf8');
+    for (const output of [text, history]) {
+      expect(output).toContain('no supported local usage source');
+      expect(output).not.toMatch(/decadra (import|usage)/);
+    }
+    expect(history.trim().split('\n')).toHaveLength(2);
+  });
+
   it('renders every provider, keeps ccusage offline, appends verdicts, and flags the zero-priced model', async () => {
     const h = await harness();
     await addBaseline(h.ctx.paths.baseline, { asOf: '2026-08-01', provider: 'anthropic-claude-code', product: 'Claude Max 20x', tier: 'max20', price: 200, currency: 'USD', billing: 'monthly' });

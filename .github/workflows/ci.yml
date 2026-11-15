@@ -40,10 +40,10 @@ jobs:
         run: |
           npm pack
           mkdir -p "$RUNNER_TEMP/packed"
-          tar xf decadra-*.tgz -C "$RUNNER_TEMP/packed"
-          cd "$RUNNER_TEMP/packed/package"
-          test -f schema/plans.schema.json
-          npm install --omit=dev --ignore-scripts
-          node dist/cli.js doctor --json
+          cd "$RUNNER_TEMP/packed"
+          npm init --yes
+          npm install --omit=dev --ignore-scripts "$GITHUB_WORKSPACE"/decadra-*.tgz
+          test -f node_modules/decadra/schema/plans.schema.json
+          node node_modules/decadra/dist/cli.js doctor --json
         env:
           DECADRA_HOME: ${{ runner.temp }}/decadra-packed-home
