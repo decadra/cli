@@ -486,6 +486,11 @@
     .wrap{padding:0 16px;}
     .titlenav{gap:12px; font-size:12px;}
   }
+  .cli-guide {margin: 40px 0; max-width: 76ch; scroll-margin-top: 72px}
+  .cli-guide p,.cli-guide li {margin: .85em 0; line-height: 1.6}
+  .cli-guide ol {padding-left: 1.5em}
+  .cli-guide pre {overflow-x:auto; padding:1em; border:1px solid currentColor; font-size:.9em}
+  #commands {scroll-margin-top:72px}
 </style>
 
 <div class="titlebar">
@@ -501,6 +506,7 @@
     <nav class="titlenav">
       <a href="#why">why</a>
       <a href="#install">install</a>
+      <a href="#commands">commands</a>
       <a href="#faq">faq</a>
       <a href="https://github.com/decadra/cli" target="_blank" rel="noopener">
         <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path></svg>
@@ -650,16 +656,16 @@
         </div>
         <div class="term-body">
           <div class="copy-row">
-            <span class="cmd-text"><span class="prompt">$</span> git clone https://github.com/decadra/cli</span>
-            <button class="copy-btn" data-copy="git clone https://github.com/decadra/cli">copy</button>
+            <span class="cmd-text"><span class="prompt">$</span> npm install -g decadra</span>
+            <button class="copy-btn" data-copy="npm install -g decadra">copy</button>
           </div>
           <div class="copy-row">
-            <span class="cmd-text"><span class="prompt">$</span> cd decadra &amp;&amp; npm install &amp;&amp; npm run build</span>
-            <button class="copy-btn" data-copy="cd decadra && npm install && npm run build">copy</button>
+            <span class="cmd-text"><span class="prompt">$</span> decadra setup</span>
+            <button class="copy-btn" data-copy="decadra setup">copy</button>
           </div>
           <div class="copy-row">
-            <span class="cmd-text"><span class="prompt">$</span> node dist/cli.js doctor</span>
-            <button class="copy-btn" data-copy="node dist/cli.js doctor">copy</button>
+            <span class="cmd-text"><span class="prompt">$</span> decadra doctor</span>
+            <button class="copy-btn" data-copy="decadra doctor">copy</button>
           </div>
         </div>
       </div>
@@ -667,20 +673,27 @@
       <div>
         <ul class="req-list">
           <li><b>Node.js</b> 22.13 or later</li>
-          <li><b>Today:</b> build from source (left). v0.4.0 is unreleased, not yet on npm.</li>
-          <li><b>Once published:</b> <code>npm install -g decadra</code> gives you the <code>decadra</code> command directly</li>
+          <li>The npm package installs both <code>decadra</code> and the optional Claude Code hook executable, <code>decadra-observe</code>.</li>
           <li><b>First run</b> writes <code>~/.decadra/plans.json</code> with plan prices as of 2026-09-05, hand maintained, never overwritten</li>
         </ul>
       </div>
     </div>
 
+    <div class="section-head" id="commands" style="margin-top:44px"><h2>Command reference</h2></div>
+    <p>Run <code>decadra --help</code> for global options or add <code>--help</code> to any command for its flags. Jump to the <a href="#harness-check">harness check example</a> or <a href="#compaction-hook">compaction hook setup</a>.</p>
     <div class="table-wrap" style="margin-top:44px;">
       <table>
-        <caption>core commands</caption>
+        <caption>Decadra 0.5.0</caption>
         <thead>
           <tr><th>command</th><th>what it does</th></tr>
         </thead>
         <tbody>
+          <tr><td><code>decadra</code></td><td>Open the home screen in a terminal.</td></tr>
+          <tr><td><code>decadra setup</code></td><td>Choose your providers and record what you pay.</td></tr>
+          <tr><td><code>decadra baseline list</code></td><td>Show saved subscription snapshots, newest first.</td></tr>
+          <tr><td><code>decadra alerts list</code></td><td>Show alerts that have fired.</td></tr>
+          <tr><td><code>decadra alerts schedule</code></td><td>Print a cron or launchd entry for scheduled checks.</td></tr>
+          <tr><td><code>decadra docs</code></td><td>Show where to find the manual.</td></tr>
           <tr><td><code>decadra now</code></td><td>this session, today, and month to date against the plan you hold</td></tr>
           <tr><td><code>decadra context status</code></td><td>inspect saved Codex compaction thresholds from the repository where you work</td></tr>
           <tr><td><code>decadra harness check</code></td><td>follow repository instruction imports and show missing targets before starting work</td></tr>
@@ -694,6 +707,34 @@
       </table>
     </div>
 
+    <article class="cli-guide" id="harness-check">
+      <h3>Do Claude Code and Codex share repository instructions?</h3>
+      <p>Run <code>decadra harness check</code> in the directory where you work. It identifies the instruction files that apply there and follows explicit imports in Claude Code’s Markdown. For example, put <code>@AGENTS.md</code> in <code>CLAUDE.md</code> to point Claude Code at the same repository instructions Codex reads.</p>
+      <p><strong>shared</strong> means the Claude import chain reaches each detected Codex instruction file. <strong>independent</strong> means the files exist but that connection is absent. <strong>missing</strong> names a required file or import target the checker could not find. Restore the named file or correct the import, then run the check again. <strong>unknown</strong> means the checker could not resolve the setup fully. The check is read-only.</p>
+    </article>
+    <article class="cli-guide" id="compaction-hook">
+      <h3>Observe Claude Code compaction</h3>
+      <p>Claude Code decides when to compact. The optional hook records when compaction starts and finishes. Try it in a disposable project first. On one Mac, observer startup took 165 ms at the 95th percentile, above the pilot’s 100 ms target.</p>
+      <ol>
+        <li>Install the CLI with <code>npm install -g decadra</code>. In the POSIX shell you use to launch Claude Code, run <code>command -v decadra-observe</code> and confirm it prints a path.</li>
+        <li>In the test project, create <code>.claude/settings.local.json</code> with the example below. If the file already exists, merge these entries into its <code>hooks</code> object, preserving other settings and any existing event handlers.
+<pre><code>{
+  "hooks": {
+    "PreCompact": [
+      {"hooks": [{"type": "command", "command": "decadra-observe || true", "timeout": 2}]}
+    ],
+    "PostCompact": [
+      {"hooks": [{"type": "command", "command": "decadra-observe || true", "timeout": 2}]}
+    ]
+  }
+}</code></pre></li>
+        <li>Start a fresh Claude Code session in that project, have a short conversation, then run <code>/compact</code>. In your shell, use SQLite to see the most recent events:
+<pre><code>sqlite3 "${DECADRA_HOME:-$HOME/.decadra}/compact.sqlite" \
+  'SELECT utc, kind, phase FROM compact_v1 ORDER BY rowid DESC LIMIT 10;'</code></pre>
+        Look for <code>PreCompact</code> and <code>PostCompact</code> with UTC timestamps. The observer stores metadata locally, including a hashed session ID. The optional phase is empty unless you launch with <code>DECADRA_PHASE</code> set to <code>implementation</code>, <code>verification</code>, or <code>handoff</code>.</li>
+      </ol>
+      <p>To turn observation off, remove the two observer handlers and start a fresh session.</p>
+    </article>
     <div class="table-wrap" style="margin-top:44px;">
       <table>
         <caption>provider support</caption>
@@ -802,7 +843,7 @@
       <a href="https://github.com/decadra/cli/issues" target="_blank" rel="noopener">issues</a>
       <a href="https://github.com/decadra/cli/blob/main/LICENSE" target="_blank" rel="noopener">license</a>
       <span class="clock" id="clock" aria-hidden="true"></span>
-      <span>v0.4.0</span>
+      <span>v0.5.0</span>
     </div>
   </div>
 </footer>
